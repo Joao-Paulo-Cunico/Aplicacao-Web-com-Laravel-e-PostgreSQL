@@ -67,6 +67,14 @@
             color: #dc3545;
             font-size: 13px;
         }
+
+        .mensagem-sucesso {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
     </style>
 </head>
 
@@ -78,12 +86,18 @@
 
     <p>Altere as informações do pagamento abaixo.</p>
 
+    @if (session('success'))
+        <div class="mensagem-sucesso">
+            {{ session('success') }}
+        </div>
+    @endif
+
     <form action="{{ route('pagamentos.update', $pagamento) }}" method="POST">
 
         @csrf
         @method('PUT')
 
-        <!-- Ordem de Servico -->
+        <!-- Ordem de Serviço -->
         <label>Número da Ordem de Serviço</label>
         <input type="number"
                name="ordem_servico_id"
@@ -95,7 +109,7 @@
             <span class="erro">{{ $message }}</span>
         @enderror
 
-        <!-- Data -->
+        <!-- Data do Pagamento -->
         <label>Data do Pagamento</label>
         <input type="date"
                name="data_pagamento"
@@ -154,57 +168,18 @@
             <span class="erro">{{ $message }}</span>
         @enderror
 
-        <!-- Botoes -->
+        <!-- Botões -->
         <button type="submit" class="btn">
             Salvar Alterações
         </button>
 
-        <a href="{{ route('pagamentos.index') }}"
-           class="btn voltar">
+        <a href="{{ route('pagamentos.index') }}" class="btn voltar">
             Voltar
         </a>
 
     </form>
 
 </div>
-
-    <hr style="margin-top:30px; border:1px solid #eee;">
-
-    <h2>Repor Estoque</h2>
-
-    <p>
-        Estoque atual:
-        <strong>{{ $peca->estoque }} unidades</strong>
-    </p>
-
-    @if (session('success'))
-        <div style="background:#d4edda; color:#155724; padding:12px; border-radius:5px;">
-            {{ session('success') }}
-        </div>
-    @endif
-
-    <form action="{{ route('pecas.repor-estoque', $peca) }}" method="POST">
-        @csrf
-
-        <label>Quantidade para adicionar ao estoque</label>
-
-        <input type="number"
-            name="quantidade"
-            min="1"
-            max="10000"
-            step="1"
-            value="{{ old('quantidade') }}"
-            placeholder="Exemplo: 5"
-            required>
-
-        @error('quantidade')
-            <span class="erro">{{ $message }}</span>
-        @enderror
-
-        <button type="submit" class="btn">
-            + Adicionar ao Estoque
-        </button>
-    </form>
 
 </body>
 </html>
