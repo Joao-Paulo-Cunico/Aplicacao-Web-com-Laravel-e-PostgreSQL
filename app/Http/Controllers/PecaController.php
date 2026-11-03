@@ -18,7 +18,7 @@ class PecaController extends Controller
   
     public function create()
     {
-        //
+         return view('pecas.create');
     }
 
      public function store(Request $request)
@@ -87,4 +87,21 @@ class PecaController extends Controller
             ->route('pecas.index')
             ->with('success', 'Peca excluida com sucesso!');
     }
+ 
+    public function reporEstoque(Request $request, Peca $peca)
+    {
+        $dados = $request->validate([
+            'quantidade' => 'required|integer|min:1|max:10000',
+        ]);
+
+        DB::statement(
+            'CALL oficina_mecanica.sp_repor_estoque(?, ?)',
+            [$peca->id_peca, $dados['quantidade']]
+        );
+
+        return redirect()
+            ->route('pecas.edit', $peca)
+            ->with('success', 'Estoque atualizado com sucesso!');
+    }
+
 }

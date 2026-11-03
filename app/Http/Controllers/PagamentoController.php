@@ -14,7 +14,9 @@ class PagamentoController extends Controller
 
 public function index()
 {
-    $pagamentos = Pagamento::orderByDesc('id_pagamento')
+ $pagamentos = Pagamento::select('pagamento.*')
+        ->selectRaw('oficina_mecanica.fn_total_pago_ordem(ordem_servico_id) AS total_pago_os')
+        ->orderByDesc('id_pagamento')
         ->paginate(15);
 
     return view('pagamentos.index', compact('pagamentos'));

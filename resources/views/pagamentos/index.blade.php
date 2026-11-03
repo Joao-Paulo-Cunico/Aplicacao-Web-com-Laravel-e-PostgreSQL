@@ -121,6 +121,7 @@
                     <th>Ordem de Serviço</th>
                     <th>Data</th>
                     <th>Valor</th>
+                    <th>Total Pago da OS</th>
                     <th>Forma de Pagamento</th>
                     <th>Status</th>
                     <th>Ações</th>
@@ -144,6 +145,10 @@
 
                         <td class="valor">
                             R$ {{ number_format((float) $pagamento->valor, 2, ',', '.') }}
+                        </td>
+                        
+                        <td class="valor">
+                            R$ {{ number_format((float) $pagamento->total_pago_os, 2, ',', '.') }}
                         </td>
 
                         <td>
@@ -184,7 +189,7 @@
                 @empty
 
                     <tr>
-                         <td colspan="7" style="text-align:center;">    
+                       <td colspan="8" style="text-align:center;">
                             Nenhum pagamento cadastrado.
                         </td>
                     </tr>

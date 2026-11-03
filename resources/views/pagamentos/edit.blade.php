@@ -168,5 +168,43 @@
 
 </div>
 
+    <hr style="margin-top:30px; border:1px solid #eee;">
+
+    <h2>Repor Estoque</h2>
+
+    <p>
+        Estoque atual:
+        <strong>{{ $peca->estoque }} unidades</strong>
+    </p>
+
+    @if (session('success'))
+        <div style="background:#d4edda; color:#155724; padding:12px; border-radius:5px;">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    <form action="{{ route('pecas.repor-estoque', $peca) }}" method="POST">
+        @csrf
+
+        <label>Quantidade para adicionar ao estoque</label>
+
+        <input type="number"
+            name="quantidade"
+            min="1"
+            max="10000"
+            step="1"
+            value="{{ old('quantidade') }}"
+            placeholder="Exemplo: 5"
+            required>
+
+        @error('quantidade')
+            <span class="erro">{{ $message }}</span>
+        @enderror
+
+        <button type="submit" class="btn">
+            + Adicionar ao Estoque
+        </button>
+    </form>
+
 </body>
 </html>
