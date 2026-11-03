@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Servico;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
+use App\Http\Requests\ServicoRequest;
 use Illuminate\View\View;
 
 class ServicoController extends Controller
@@ -21,9 +21,9 @@ class ServicoController extends Controller
     {
         return view('servicos.create');
     }
-    public function store(Request $request): RedirectResponse
+    public function store(ServicoRequest $request): RedirectResponse
     {
-        $dados = $request->only(['nome', 'descricao', 'preco_base', 'tempo_estimado']);
+        $dados = $request->validated();
         $dados['ativo'] = $request->boolean('ativo');
 
         Servico::create($dados);
@@ -42,9 +42,9 @@ class ServicoController extends Controller
         return view('servicos.edit', compact('servico'));
     }
 
-    public function update(Request $request, Servico $servico): RedirectResponse
+    public function update(ServicoRequest $request, Servico $servico): RedirectResponse
     {
-        $dados = $request->only(['nome', 'descricao', 'preco_base', 'tempo_estimado']);
+        $dados = $request->validated();
         $dados['ativo'] = $request->boolean('ativo');
 
         $servico->update($dados);
