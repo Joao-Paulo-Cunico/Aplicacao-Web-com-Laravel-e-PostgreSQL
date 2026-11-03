@@ -10,6 +10,10 @@ class Cliente extends Model
 
     protected $primaryKey = 'id_cliente';
 
+    public $incrementing = true;
+
+    protected $keyType = 'int';
+
     public $timestamps = false;
 
     protected $fillable = [
