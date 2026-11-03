@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Mecanico;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
+use App\Http\Requests\MecanicoRequest;
 use Illuminate\View\View;
 
 class MecanicoController extends Controller
@@ -21,9 +21,9 @@ class MecanicoController extends Controller
         return view('mecanicos.create');
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(MecanicoRequest $request): RedirectResponse
     {
-        $dados = $request->only(['nome', 'cpf', 'telefone', 'especilidade', 'data_admissao']);
+        $dados = $request->validated();
         $dados['ativo'] = $request->boolean('ativo');
 
         Mecanico::create($dados);
@@ -42,9 +42,9 @@ class MecanicoController extends Controller
         return view('mecanicos.edit', compact('mecanico'));
     }
 
-    public function update(Request $request, Mecanico $mecanico): RedirectResponse
+    public function update(MecanicoRequest $request, Mecanico $mecanico): RedirectResponse
     {
-        $dados = $request->only(['nome', 'cpf', 'telefone', 'especilidade', 'data_admissao']);
+        $dados = $request->validated();
         $dados['ativo'] = $request->boolean('ativo');
 
         $mecanico->update($dados);
