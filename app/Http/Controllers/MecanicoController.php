@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Mecanico;
-use Illuminate\Http\RedirectResponse;
 use App\Http\Requests\MecanicoRequest;
+use App\Models\Mecanico;
+use Illuminate\Database\QueryException;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 class MecanicoController extends Controller
@@ -55,7 +56,12 @@ class MecanicoController extends Controller
 
     public function destroy(Mecanico $mecanico): RedirectResponse
     {
-        $mecanico->delete();
+        try {
+            $mecanico->delete();
+        } catch (QueryException $e) {
+            return redirect()->route('mecanicos.index')
+                ->with('error', 'Não foi possível excluir: o mecânico possui ordens de serviço.');
+        }
 
         return redirect()->route('mecanicos.index')
             ->with('success', 'Mecânico excluído com sucesso.');
