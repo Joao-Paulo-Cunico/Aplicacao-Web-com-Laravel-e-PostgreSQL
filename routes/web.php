@@ -24,3 +24,14 @@ Route::post('ordens-servico/{ordemServico}/fechar', [OrdemServicoController::cla
     ->name('ordens-servico.fechar');
 Route::post('ordens-servico/{ordemServico}/cancelar', [OrdemServicoController::class, 'cancelar'])
     ->name('ordens-servico.cancelar');
+
+// Luis Molon
+Route::resource('pecas', \App\Http\Controllers\PecaController::class)
+    ->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
+
+Route::post('/pecas/{peca}/repor-estoque',
+    [\App\Http\Controllers\PecaController::class, 'reporEstoque']
+)->name('pecas.repor-estoque');
+
+Route::resource('pagamentos', \App\Http\Controllers\PagamentoController::class)
+    ->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
