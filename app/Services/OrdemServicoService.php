@@ -4,12 +4,21 @@ namespace App\Services;
 
 use App\Models\Mecanico;
 use App\Models\OrdemServico;
+use App\Models\Servico;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
-use App\Models\Servico;
 
 class OrdemServicoService
 {
+    //Nomes centralizados para facilitar o alinhamento com os scripts SQL do grupo. */
+    private const FUNCAO_CALCULAR_TOTAL = 'oficina_mecanica.fn_calcular_total_os';
+
+    private const PROCEDURE_FINALIZAR = 'oficina_mecanica.sp_finalizar_os';
+
+    //A trigger baixa o estoque; o cancelamento precisa repor a quantidade. */
+    private const DEVOLVER_ESTOQUE_NO_CANCELAMENTO = true;
+
     private const TRANSICOES = [
         OrdemServico::STATUS_EM_ANDAMENTO => [
             OrdemServico::STATUS_FINALIZADA,
@@ -57,6 +66,17 @@ class OrdemServicoService
         ];
     }
 
+    //Calcula o total pela function PostgreSQL para demonstrar a integração SQL. */
+    public function calcularTotalViaFuncao(OrdemServico $ordem): float
+    {
+        $resultado = DB::select(
+            'select '.self::FUNCAO_CALCULAR_TOTAL.'(?) as total',
+            [$ordem->id_ordem_servico]
+        );
+
+        return round((float) ($resultado[0]->total ?? 0), 2);
+    }
+
     public function podeTransitar(string $de, string $para): bool
     {
         return in_array($para, self::TRANSICOES[$de] ?? [], true);
@@ -84,6 +104,61 @@ class OrdemServicoService
                 'status' => 'Esta ordem de serviço não está em andamento e não pode ser alterada.',
             ]);
         }
+    }
+
+    //Finaliza a OS pela procedure PostgreSQL, após bloquear a linha na transação. */
+    public function fechar(OrdemServico $ordem): void
+    {
+        try {
+            DB::transaction(function () use ($ordem) {
+                $ordem = OrdemServico::lockForUpdate()->findOrFail($ordem->id_ordem_servico);
+                $this->validarTransicao($ordem, OrdemServico::STATUS_FINALIZADA);
+
+                if ($ordem->data_abertura->isAfter(today())) {
+                    throw ValidationException::withMessages([
+                        'data_fechamento' => 'A data de fechamento não pode ser anterior à data de abertura.',
+                    ]);
+                }
+
+                DB::statement('CALL '.self::PROCEDURE_FINALIZAR.'(?)', [$ordem->id_ordem_servico]);
+            });
+        } catch (QueryException $exception) {
+            throw ValidationException::withMessages([
+                'status' => $this->mensagemDoBanco($exception),
+            ]);
+        }
+    }
+
+    //Cancela a OS e repõe suas peças na mesma transação. */
+    public function cancelar(OrdemServico $ordem): void
+    {
+        DB::transaction(function () use ($ordem) {
+            $ordem = OrdemServico::lockForUpdate()->findOrFail($ordem->id_ordem_servico);
+            $this->validarTransicao($ordem, OrdemServico::STATUS_CANCELADA);
+
+            if ($ordem->data_abertura->isAfter(today())) {
+                throw ValidationException::withMessages([
+                    'data_fechamento' => 'A data de cancelamento não pode ser anterior à data de abertura.',
+                ]);
+            }
+
+            if (self::DEVOLVER_ESTOQUE_NO_CANCELAMENTO) {
+                $pecas = DB::table('oficina_mecanica.ordem_servico_peca')
+                    ->where('ordem_servico_id', $ordem->id_ordem_servico)
+                    ->get(['peca_id', 'quantidade']);
+
+                foreach ($pecas as $peca) {
+                    DB::table('oficina_mecanica.peca')
+                        ->where('id_peca', $peca->peca_id)
+                        ->update(['estoque' => DB::raw('estoque + '.(int) $peca->quantidade)]);
+                }
+            }
+
+            $ordem->update([
+                'status' => OrdemServico::STATUS_CANCELADA,
+                'data_fechamento' => today()->toDateString(),
+            ]);
+        });
     }
 
 
@@ -189,9 +264,10 @@ class OrdemServicoService
                 ]);
             }
 
-            // Insere a peça na OS.
-            // A trigger do PostgreSQL deverá realizar a baixa do estoque.
-            $ordem->pecas()->attach($pecaId, [
+            // A baixa de estoque é responsabilidade exclusiva da trigger do PostgreSQL.
+            DB::table('oficina_mecanica.ordem_servico_peca')->insert([
+                'ordem_servico_id' => $ordem->id_ordem_servico,
+                'peca_id' => $pecaId,
                 'quantidade' => $quantidade,
                 'valor_unitario' => $peca->preco_venda,
                 'desconto' => $desconto,
@@ -208,5 +284,10 @@ class OrdemServicoService
             ->value('total');
 
         return round((float) $total, 2);
+    }
+
+    private function mensagemDoBanco(QueryException $exception): string
+    {
+        return $exception->errorInfo[2] ?? 'Não foi possível finalizar a ordem de serviço.';
     }
 }

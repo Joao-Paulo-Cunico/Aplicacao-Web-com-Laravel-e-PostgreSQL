@@ -44,11 +44,6 @@ class OrdemServico extends Model
         return $this->belongsTo(Mecanico::class, 'mecanico_id', 'id_mecanico');
     }
 
-    public function veiculo(): BelongsTo
-    {
-        return $this->belongsTo(Veiculo::class, 'veiculo_id', 'id_veiculo');
-    }
-
     public function servicos(): BelongsToMany
     {
         return $this->belongsToMany(
@@ -59,13 +54,4 @@ class OrdemServico extends Model
         )->withPivot(['quantidade', 'valor_unitario', 'desconto']);
     }
 
-    public function pecas(): BelongsToMany
-    {
-        return $this->belongsToMany(
-            Peca::class,
-            'oficina_mecanica.ordem_servico_peca',
-            'ordem_servico_id',
-            'peca_id'
-        )->withPivot(['quantidade', 'valor_unitario', 'desconto']);
-    }
 }

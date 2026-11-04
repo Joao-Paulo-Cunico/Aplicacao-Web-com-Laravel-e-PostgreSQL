@@ -4,6 +4,14 @@
 
 @section('content')
     <div class="card">
+        @if (session('success'))
+            <p>{{ session('success') }}</p>
+        @endif
+
+        @if (session('error'))
+            <p>{{ session('error') }}</p>
+        @endif
+
         @if ($errors->any())
             <ul>
                 @foreach ($errors->all() as $erro)
@@ -19,6 +27,17 @@
         <p><strong>Fechamento:</strong> {{ $ordem->data_fechamento?->format('d/m/Y') ?? '—' }}</p>
         <p><strong>Quilometragem de entrada:</strong> {{ number_format($ordem->quilometragem_entrada, 0, ',', '.') }} km</p>
         <p><strong>Observações:</strong> {{ $ordem->observacoes ?: '—' }}</p>
+
+        @if ($ordem->status === \App\Models\OrdemServico::STATUS_EM_ANDAMENTO)
+            <form action="{{ route('ordens-servico.fechar', $ordem) }}" method="POST">
+                @csrf
+                <button type="submit" onclick="return confirm('Deseja finalizar esta ordem de serviço?')">Finalizar OS</button>
+            </form>
+            <form action="{{ route('ordens-servico.cancelar', $ordem) }}" method="POST">
+                @csrf
+                <button type="submit" onclick="return confirm('Deseja cancelar esta ordem de serviço? As peças serão devolvidas ao estoque.')">Cancelar OS</button>
+            </form>
+        @endif
 
         <h3>Serviços</h3>
         <table>
@@ -121,6 +140,13 @@
         <p>Serviços: R$ {{ number_format($totais['servicos'], 2, ',', '.') }}</p>
         <p>Peças: R$ {{ number_format($totais['pecas'], 2, ',', '.') }}</p>
         <p><strong>Total: R$ {{ number_format($totais['total'], 2, ',', '.') }}</strong></p>
+        <p><strong>Total (função SQL):</strong>
+            @if ($totalViaFuncao !== null)
+                R$ {{ number_format($totalViaFuncao, 2, ',', '.') }}
+            @else
+                indisponível — execute os scripts SQL no Neon.
+            @endif
+        </p>
 
         <a href="{{ route('ordens-servico.index') }}">Voltar</a>
     </div>
