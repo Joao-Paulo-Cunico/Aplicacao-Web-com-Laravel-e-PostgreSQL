@@ -12,6 +12,10 @@ class OrdemServico extends Model
 
     protected $primaryKey = 'id_ordem_servico';
 
+    public const STATUS_EM_ANDAMENTO = 'Em andamento';
+    public const STATUS_FINALIZADA = 'Finalizada';
+    public const STATUS_CANCELADA = 'Cancelada';
+
     const CREATED_AT = 'create_at';
     const UPDATED_AT = 'update_at';
 
