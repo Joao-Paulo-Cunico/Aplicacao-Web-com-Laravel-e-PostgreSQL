@@ -63,7 +63,6 @@ class ServicoController extends Controller
                 return redirect()->route('servicos.index')
                     ->with('error', 'Não foi possível excluir: o serviço já foi usado em ordens de serviço.');
             }
-
             throw $e;
         }
 
