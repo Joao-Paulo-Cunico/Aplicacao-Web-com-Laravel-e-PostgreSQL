@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Modelo;
 use App\Models\Marca;
+use App\Models\Veiculo;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Database\QueryException;
 
 class ModeloController extends Controller
 {
@@ -103,7 +105,34 @@ class ModeloController extends Controller
 
     public function destroy(Modelo $modelo)
     {
-        $modelo->delete();
+        // Verifica se existem veículos vinculados ao modelo.
+        $possuiVeiculos = Veiculo::where(
+            'modelo_id',
+            $modelo->id_modelo
+        )->exists();
+
+        if ($possuiVeiculos) {
+            return redirect()->route('modelos.index')
+                ->with(
+                    'error',
+                    'Este modelo não pode ser excluído porque possui veículos vinculados.'
+                );
+        }
+
+        // Proteção adicional contra violações de chave estrangeira.
+        try {
+            $modelo->delete();
+        } catch (QueryException $e) {
+            if ($e->getCode() === '23503') {
+                return redirect()->route('modelos.index')
+                    ->with(
+                        'error',
+                        'Este modelo possui registros vinculados e não pode ser excluído.'
+                    );
+            }
+
+            throw $e;
+        }
 
         return redirect()->route('modelos.index')
             ->with('success', 'Modelo excluído com sucesso!');
