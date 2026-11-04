@@ -33,7 +33,6 @@ CREATE TABLE IF NOT EXISTS oficina_mecanica.historico_status_pagamento_luis (
     data_alteracao TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- Funcao de auditoria
 CREATE OR REPLACE FUNCTION oficina_mecanica.fn_auditar_status_pagamento_luis()
 RETURNS TRIGGER
 LANGUAGE plpgsql
