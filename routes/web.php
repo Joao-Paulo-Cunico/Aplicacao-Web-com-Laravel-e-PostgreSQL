@@ -17,3 +17,9 @@ Route::resource('marcas', MarcaController::class);
 Route::resource('modelos', ModeloController::class);
 
 Route::resource('veiculos', VeiculoController::class);
+
+Route::patch('/clientes/{cliente}/reativar', [ClienteController::class, 'reativar'])
+    ->name('clientes.reativar');
+
+Route::patch('/veiculos/{veiculo}/reativar', [VeiculoController::class, 'reativar'])
+    ->name('veiculos.reativar');

@@ -8,20 +8,17 @@
 <div class="card">
 
     <div style="margin-bottom:25px;">
-        <h2 style="margin:0 0 8px;">
-            Editar Veículo
-        </h2>
+        <h2 style="margin:0 0 8px;">Editar Veículo</h2>
 
         <p style="color:#64748b; margin:0;">
-            Atualize as informações do veículo cadastrado.
+            Atualize as informações e gerencie a situação do veículo.
         </p>
     </div>
 
     @if ($errors->any())
-        <div style="background:#ffebee; color:#b71c1c; padding:15px; border-radius:6px; margin-bottom:20px;">
-            <strong>Verifique os erros:</strong>
-
-            <ul style="margin-top:10px;">
+        <div style="background:#fee2e2; color:#991b1b; padding:15px; border-radius:6px; margin-bottom:20px;">
+            <strong>Verifique os campos:</strong>
+            <ul>
                 @foreach ($errors->all() as $erro)
                     <li>{{ $erro }}</li>
                 @endforeach
@@ -30,32 +27,38 @@
     @endif
 
     @if (session('success'))
-        <div style="background:#e8f5e9; color:#256029; padding:15px; border-radius:6px; margin-bottom:20px;">
+        <div style="background:#dcfce7; color:#166534; padding:15px; border-radius:6px; margin-bottom:20px;">
             {{ session('success') }}
         </div>
     @endif
 
-    <!-- FORMULÁRIO DE EDIÇÃO -->
-    <form action="{{ route('veiculos.update', $veiculo) }}"
-          method="POST">
+    <div style="margin-bottom:25px;">
+        <strong>Situação:</strong>
 
+        @if ($veiculo->ativo)
+            <span style="background:#dcfce7; color:#166534; padding:5px 12px; border-radius:20px; font-size:13px;">
+                Ativo
+            </span>
+        @else
+            <span style="background:#fee2e2; color:#991b1b; padding:5px 12px; border-radius:20px; font-size:13px;">
+                Inativo
+            </span>
+        @endif
+    </div>
+
+    <!-- FORMULÁRIO DE EDIÇÃO -->
+    <form action="{{ route('veiculos.update', $veiculo) }}" method="POST">
         @csrf
         @method('PUT')
 
         <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:20px;">
 
-            <!-- Proprietário -->
             <div>
-                <label for="cliente_id"
-                       style="display:block; margin-bottom:8px; font-weight:bold;">
+                <label for="cliente_id" style="display:block; margin-bottom:8px; font-weight:bold;">
                     Proprietário
                 </label>
 
-                <select name="cliente_id"
-                        id="cliente_id"
-                        style="width:100%;"
-                        required>
-
+                <select name="cliente_id" id="cliente_id" style="width:100%;" required>
                     <option value="">Selecione um cliente</option>
 
                     @foreach ($clientes as $cliente)
@@ -64,22 +67,15 @@
                             {{ $cliente->nome }}
                         </option>
                     @endforeach
-
                 </select>
             </div>
 
-            <!-- Modelo -->
             <div>
-                <label for="modelo_id"
-                       style="display:block; margin-bottom:8px; font-weight:bold;">
+                <label for="modelo_id" style="display:block; margin-bottom:8px; font-weight:bold;">
                     Modelo do Veículo
                 </label>
 
-                <select name="modelo_id"
-                        id="modelo_id"
-                        style="width:100%;"
-                        required>
-
+                <select name="modelo_id" id="modelo_id" style="width:100%;" required>
                     <option value="">Selecione um modelo</option>
 
                     @foreach ($modelos as $modelo)
@@ -88,14 +84,11 @@
                             {{ $modelo->marca?->nome ?? 'Sem marca' }} - {{ $modelo->nome }}
                         </option>
                     @endforeach
-
                 </select>
             </div>
 
-            <!-- Placa -->
             <div>
-                <label for="placa"
-                       style="display:block; margin-bottom:8px; font-weight:bold;">
+                <label for="placa" style="display:block; margin-bottom:8px; font-weight:bold;">
                     Placa
                 </label>
 
@@ -109,10 +102,8 @@
                        required>
             </div>
 
-            <!-- Ano -->
             <div>
-                <label for="ano"
-                       style="display:block; margin-bottom:8px; font-weight:bold;">
+                <label for="ano" style="display:block; margin-bottom:8px; font-weight:bold;">
                     Ano do Veículo
                 </label>
 
@@ -124,10 +115,8 @@
                        required>
             </div>
 
-            <!-- Cor -->
             <div>
-                <label for="cor"
-                       style="display:block; margin-bottom:8px; font-weight:bold;">
+                <label for="cor" style="display:block; margin-bottom:8px; font-weight:bold;">
                     Cor
                 </label>
 
@@ -141,10 +130,8 @@
                        required>
             </div>
 
-            <!-- Quilometragem -->
             <div>
-                <label for="quilometragem"
-                       style="display:block; margin-bottom:8px; font-weight:bold;">
+                <label for="quilometragem" style="display:block; margin-bottom:8px; font-weight:bold;">
                     Quilometragem
                 </label>
 
@@ -160,7 +147,6 @@
 
         </div>
 
-        <!-- Botões de edição -->
         <div style="display:flex; align-items:center; gap:15px; flex-wrap:wrap; margin-top:30px;">
 
             <button type="submit"
@@ -174,10 +160,9 @@
             </a>
 
         </div>
-
     </form>
 
-    <!-- ÁREA DE DESATIVAÇÃO -->
+    <!-- GERENCIAMENTO DO VEÍCULO -->
     <div style="margin-top:35px; padding-top:25px; border-top:1px solid #e2e8f0;">
 
         @if ($veiculo->ativo)
@@ -188,15 +173,14 @@
                     Desativar Veículo
                 </h3>
 
-                <p style="color:#64748b; margin-bottom:18px; line-height:1.6;">
-                    Ao desativar este veículo, ele será marcado
-                    como inativo no sistema, mas seu cadastro
-                    e histórico serão preservados.
+                <p style="color:#64748b; margin-bottom:18px;">
+                    Ao desativar este veículo, seu cadastro ficará inativo,
+                    mas os dados e o histórico serão preservados.
                 </p>
 
                 <form action="{{ route('veiculos.destroy', $veiculo) }}"
                       method="POST"
-                      onsubmit="return confirm('Tem certeza que deseja desativar este veículo?');">
+                      onsubmit="return confirm('Deseja realmente desativar este veículo?');">
 
                     @csrf
                     @method('DELETE')
@@ -207,19 +191,34 @@
                     </button>
 
                 </form>
-
             </div>
 
         @else
 
-            <div style="background:#f1f5f9; padding:18px; border-radius:8px;">
-                <strong style="color:#475569;">
-                    Este veículo está inativo.
-                </strong>
+            <div style="background:#f0fdf4; border:1px solid #bbf7d0; padding:20px; border-radius:8px;">
 
-                <p style="color:#64748b; margin:8px 0 0;">
-                    O cadastro foi preservado no sistema.
+                <h3 style="color:#166534; margin:0 0 10px;">
+                    Reativar Veículo
+                </h3>
+
+                <p style="color:#64748b; margin-bottom:18px;">
+                    Este veículo está inativo. Você pode reativá-lo
+                    sem precisar realizar um novo cadastro.
                 </p>
+
+                <form action="{{ route('veiculos.reativar', $veiculo) }}"
+                      method="POST"
+                      onsubmit="return confirm('Deseja reativar este veículo?');">
+
+                    @csrf
+                    @method('PATCH')
+
+                    <button type="submit"
+                            style="background:#15803d; color:white; padding:11px 18px; border:none; border-radius:6px; cursor:pointer;">
+                        Reativar Veículo
+                    </button>
+
+                </form>
             </div>
 
         @endif

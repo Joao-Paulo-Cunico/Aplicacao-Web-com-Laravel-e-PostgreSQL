@@ -126,4 +126,21 @@ class ClienteController extends Controller
         return redirect()->route('clientes.index')
             ->with('success', 'Cliente desativado com sucesso!');
     }
+    public function reativar(Cliente $cliente)
+    {
+        if ($cliente->ativo) {
+            return redirect()
+                ->route('clientes.index')
+                ->with('success', 'Este cliente já está ativo.');
+        }
+
+        $cliente->update([
+            'ativo' => true,
+            'updated_at' => now()->toDateString(),
+        ]);
+
+        return redirect()
+            ->route('clientes.index')
+            ->with('success', 'Cliente reativado com sucesso!');
+    }
 }

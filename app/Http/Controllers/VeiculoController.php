@@ -28,48 +28,26 @@ class VeiculoController extends Controller
 
             $veiculos->where(function ($query) use ($busca, $placa) {
 
-                // Pesquisa por placa.
                 if ($placa !== '') {
-                    $query->where(
-                        'placa',
-                        'ILIKE',
-                        '%' . $placa . '%'
-                    );
+                    $query->where('placa', 'ILIKE', '%' . $placa . '%');
                 } else {
-                    $query->where(
-                        'placa',
-                        'ILIKE',
-                        '%' . $busca . '%'
-                    );
+                    $query->where('placa', 'ILIKE', '%' . $busca . '%');
                 }
 
-                // Pesquisa pelo proprietário.
                 $query->orWhereHas('cliente', function ($clienteQuery) use ($busca) {
-                    $clienteQuery->where(
-                        'nome',
-                        'ILIKE',
-                        '%' . $busca . '%'
-                    );
+                    $clienteQuery->where('nome', 'ILIKE', '%' . $busca . '%');
                 });
 
-                // Pesquisa pelo modelo ou marca.
                 $query->orWhereHas('modelo', function ($modeloQuery) use ($busca) {
-                    $modeloQuery->where(
-                        'nome',
-                        'ILIKE',
-                        '%' . $busca . '%'
-                    )->orWhereHas('marca', function ($marcaQuery) use ($busca) {
-                        $marcaQuery->where(
-                            'nome',
-                            'ILIKE',
-                            '%' . $busca . '%'
-                        );
-                    });
+                    $modeloQuery->where('nome', 'ILIKE', '%' . $busca . '%')
+                        ->orWhereHas('marca', function ($marcaQuery) use ($busca) {
+                            $marcaQuery->where('nome', 'ILIKE', '%' . $busca . '%');
+                        });
                 });
             });
         }
 
-        // Filtro por status.
+        // Filtro por situação.
         if ($status === 'ativos') {
             $veiculos->where('ativo', true);
         } elseif ($status === 'inativos') {
@@ -92,10 +70,7 @@ class VeiculoController extends Controller
             ->orderBy('nome')
             ->get();
 
-        return view('veiculos.create', compact(
-            'clientes',
-            'modelos'
-        ));
+        return view('veiculos.create', compact('clientes', 'modelos'));
     }
 
     public function store(Request $request)
@@ -136,7 +111,8 @@ class VeiculoController extends Controller
 
         Veiculo::create($dados);
 
-        return redirect()->route('veiculos.index')
+        return redirect()
+            ->route('veiculos.index')
             ->with('success', 'Veículo cadastrado com sucesso!');
     }
 
@@ -198,18 +174,37 @@ class VeiculoController extends Controller
 
         $veiculo->update($dados);
 
-        return redirect()->route('veiculos.index')
+        return redirect()
+            ->route('veiculos.index')
             ->with('success', 'Veículo atualizado com sucesso!');
     }
 
     public function destroy(Veiculo $veiculo)
     {
-        // Desativa o veículo sem apagar seu histórico.
+        // Desativação lógica: mantém o cadastro e o histórico.
         $veiculo->update([
             'ativo' => false,
         ]);
 
-        return redirect()->route('veiculos.index')
+        return redirect()
+            ->route('veiculos.index')
             ->with('success', 'Veículo desativado com sucesso!');
+    }
+
+    public function reativar(Veiculo $veiculo)
+    {
+        if ($veiculo->ativo) {
+            return redirect()
+                ->route('veiculos.index')
+                ->with('success', 'Este veículo já está ativo.');
+        }
+
+        $veiculo->update([
+            'ativo' => true,
+        ]);
+
+        return redirect()
+            ->route('veiculos.index')
+            ->with('success', 'Veículo reativado com sucesso!');
     }
 }
