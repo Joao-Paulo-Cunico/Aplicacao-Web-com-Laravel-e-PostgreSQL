@@ -9,11 +9,27 @@ use Illuminate\Validation\Rule;
 
 class ModeloController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $modelos = Modelo::with('marca')
+        $busca = trim((string) $request->query('busca', ''));
+
+        $modelos = Modelo::with('marca');
+
+        // Pesquisa pelo nome do modelo ou da marca.
+        if ($busca !== '') {
+            $modelos->where(function ($query) use ($busca) {
+                $query->where('nome', 'ILIKE', '%' . $busca . '%')
+                    ->orWhereHas('marca', function ($marcaQuery) use ($busca) {
+                        $marcaQuery->where('nome', 'ILIKE', '%' . $busca . '%');
+                    });
+            });
+        }
+
+        $modelos = $modelos
             ->orderBy('nome')
-            ->paginate(30);
+            ->orderBy('id_modelo')
+            ->paginate(30)
+            ->withQueryString();
 
         return view('modelos.index', compact('modelos'));
     }
@@ -35,7 +51,11 @@ class ModeloController extends Controller
             ],
             'nome' => ['required', 'string', 'max:75'],
             'ano_inicio' => ['required', 'date'],
-            'ano_fim' => ['nullable', 'date', 'after_or_equal:ano_inicio'],
+            'ano_fim' => [
+                'nullable',
+                'date',
+                'after_or_equal:ano_inicio',
+            ],
         ]);
 
         Modelo::create($dados);
@@ -68,7 +88,11 @@ class ModeloController extends Controller
             ],
             'nome' => ['required', 'string', 'max:75'],
             'ano_inicio' => ['required', 'date'],
-            'ano_fim' => ['nullable', 'date', 'after_or_equal:ano_inicio'],
+            'ano_fim' => [
+                'nullable',
+                'date',
+                'after_or_equal:ano_inicio',
+            ],
         ]);
 
         $modelo->update($dados);

@@ -9,9 +9,21 @@ use Illuminate\Database\QueryException;
 
 class MarcaController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $marcas = Marca::orderBy('nome')->paginate(30);
+        $busca = trim((string) $request->query('busca', ''));
+
+        $marcas = Marca::query();
+
+        if ($busca !== '') {
+            $marcas->where('nome', 'ILIKE', '%' . $busca . '%');
+        }
+
+        $marcas = $marcas
+            ->orderBy('nome')
+            ->orderBy('id_marca')
+            ->paginate(30)
+            ->withQueryString();
 
         return view('marcas.index', compact('marcas'));
     }
@@ -57,6 +69,7 @@ class MarcaController extends Controller
 
     public function destroy(Marca $marca)
     {
+        // Impede exclusão de marcas com modelos vinculados.
         $possuiModelos = Modelo::where(
             'marca_id',
             $marca->id_marca

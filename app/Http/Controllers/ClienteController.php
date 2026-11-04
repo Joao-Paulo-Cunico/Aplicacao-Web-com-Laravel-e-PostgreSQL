@@ -8,9 +8,38 @@ use Illuminate\Validation\Rule;
 
 class ClienteController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $clientes = Cliente::orderBy('nome')->paginate(30);
+        $busca = trim((string) $request->query('busca', ''));
+        $status = $request->query('status', 'todos');
+
+        $clientes = Cliente::query();
+
+        // Pesquisa por nome ou CPF.
+        if ($busca !== '') {
+            $cpf = preg_replace('/\D/', '', $busca);
+
+            $clientes->where(function ($query) use ($busca, $cpf) {
+                $query->where('nome', 'ILIKE', '%' . $busca . '%');
+
+                if ($cpf !== '') {
+                    $query->orWhere('cpf', 'LIKE', '%' . $cpf . '%');
+                }
+            });
+        }
+
+        // Filtro por situação do cliente.
+        if ($status === 'ativos') {
+            $clientes->where('ativo', true);
+        } elseif ($status === 'inativos') {
+            $clientes->where('ativo', false);
+        }
+
+        $clientes = $clientes
+            ->orderBy('nome')
+            ->orderBy('id_cliente')
+            ->paginate(30)
+            ->withQueryString();
 
         return view('clientes.index', compact('clientes'));
     }

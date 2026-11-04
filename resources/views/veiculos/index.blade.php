@@ -33,6 +33,71 @@
         </div>
     @endif
 
+    <!-- Pesquisa e filtros -->
+    <form method="GET"
+          action="{{ route('veiculos.index') }}"
+          style="display:flex; gap:12px; align-items:end; flex-wrap:wrap; background:#f2f5f8; padding:18px; border-radius:8px; margin-bottom:20px;">
+
+        <div style="flex:2; min-width:220px;">
+            <label for="busca"
+                   style="display:block; margin-bottom:7px; font-weight:bold; font-size:13px;">
+                Pesquisar veículo
+            </label>
+
+            <input type="text"
+                   id="busca"
+                   name="busca"
+                   value="{{ request('busca') }}"
+                   placeholder="Placa, proprietário, modelo ou marca..."
+                   style="width:100%; background:white;">
+        </div>
+
+        <div style="flex:1; min-width:150px;">
+            <label for="status"
+                   style="display:block; margin-bottom:7px; font-weight:bold; font-size:13px;">
+                Status
+            </label>
+
+            <select id="status"
+                    name="status"
+                    style="width:100%; background:white;">
+
+                <option value="todos"
+                    {{ request('status', 'todos') == 'todos' ? 'selected' : '' }}>
+                    Todos
+                </option>
+
+                <option value="ativos"
+                    {{ request('status') == 'ativos' ? 'selected' : '' }}>
+                    Ativos
+                </option>
+
+                <option value="inativos"
+                    {{ request('status') == 'inativos' ? 'selected' : '' }}>
+                    Inativos
+                </option>
+
+            </select>
+        </div>
+
+        <button type="submit"
+                style="background:#064f80; height:38px;">
+            Pesquisar
+        </button>
+
+        <a href="{{ route('veiculos.index') }}"
+           style="background:#e2e8f0; color:#334155; padding:11px 15px; border-radius:5px; text-decoration:none; font-size:14px;">
+            Limpar
+        </a>
+    </form>
+
+    <!-- Quantidade de resultados -->
+    <div style="margin-bottom:15px; color:#64748b; font-size:13px;">
+        {{ $veiculos->total() }}
+        {{ $veiculos->total() == 1 ? 'veículo encontrado' : 'veículos encontrados' }}
+    </div>
+
+    <!-- Tabela de veículos -->
     <div style="overflow-x:auto;">
         <table>
             <thead>
@@ -109,8 +174,9 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="10" style="text-align:center; padding:25px;">
-                            Nenhum veículo cadastrado.
+                        <td colspan="10"
+                            style="text-align:center; padding:25px;">
+                            Nenhum veículo encontrado para os filtros informados.
                         </td>
                     </tr>
                 @endforelse
@@ -118,6 +184,7 @@
         </table>
     </div>
 
+    <!-- Paginação -->
     <div style="margin-top:20px;">
         {{ $veiculos->links() }}
     </div>

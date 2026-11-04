@@ -10,14 +10,76 @@ use Illuminate\Validation\Rule;
 
 class VeiculoController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $busca = trim((string) $request->query('busca', ''));
+        $status = $request->query('status', 'todos');
+
         $veiculos = Veiculo::with([
             'cliente',
             'modelo.marca'
-        ])
-        ->orderBy('id_veiculo', 'desc')
-        ->paginate(30);
+        ]);
+
+        // Pesquisa por placa, proprietário, modelo ou marca.
+        if ($busca !== '') {
+            $placa = strtoupper(
+                preg_replace('/[^A-Za-z0-9]/', '', $busca)
+            );
+
+            $veiculos->where(function ($query) use ($busca, $placa) {
+
+                // Pesquisa por placa.
+                if ($placa !== '') {
+                    $query->where(
+                        'placa',
+                        'ILIKE',
+                        '%' . $placa . '%'
+                    );
+                } else {
+                    $query->where(
+                        'placa',
+                        'ILIKE',
+                        '%' . $busca . '%'
+                    );
+                }
+
+                // Pesquisa pelo proprietário.
+                $query->orWhereHas('cliente', function ($clienteQuery) use ($busca) {
+                    $clienteQuery->where(
+                        'nome',
+                        'ILIKE',
+                        '%' . $busca . '%'
+                    );
+                });
+
+                // Pesquisa pelo modelo ou marca.
+                $query->orWhereHas('modelo', function ($modeloQuery) use ($busca) {
+                    $modeloQuery->where(
+                        'nome',
+                        'ILIKE',
+                        '%' . $busca . '%'
+                    )->orWhereHas('marca', function ($marcaQuery) use ($busca) {
+                        $marcaQuery->where(
+                            'nome',
+                            'ILIKE',
+                            '%' . $busca . '%'
+                        );
+                    });
+                });
+            });
+        }
+
+        // Filtro por status.
+        if ($status === 'ativos') {
+            $veiculos->where('ativo', true);
+        } elseif ($status === 'inativos') {
+            $veiculos->where('ativo', false);
+        }
+
+        $veiculos = $veiculos
+            ->orderBy('id_veiculo', 'desc')
+            ->paginate(30)
+            ->withQueryString();
 
         return view('veiculos.index', compact('veiculos'));
     }
