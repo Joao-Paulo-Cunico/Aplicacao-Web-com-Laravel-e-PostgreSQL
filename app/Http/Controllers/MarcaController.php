@@ -10,7 +10,7 @@ class MarcaController extends Controller
 {
     public function index()
     {
-        $marcas = Marca::orderBy('nome')->paginate(10);
+        $marcas = Marca::orderBy('nome')->paginate(30);
 
         return view('marcas.index', compact('marcas'));
     }

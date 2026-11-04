@@ -17,7 +17,7 @@ class VeiculoController extends Controller
             'modelo.marca'
         ])
         ->orderBy('id_veiculo', 'desc')
-        ->paginate(10);
+        ->paginate(30);
 
         return view('veiculos.index', compact('veiculos'));
     }

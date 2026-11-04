@@ -13,7 +13,7 @@ class ModeloController extends Controller
     {
         $modelos = Modelo::with('marca')
             ->orderBy('nome')
-            ->paginate(10);
+            ->paginate(30);
 
         return view('modelos.index', compact('modelos'));
     }
