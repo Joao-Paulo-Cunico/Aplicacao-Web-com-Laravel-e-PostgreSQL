@@ -5,76 +5,109 @@
 
 @section('content')
 
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-    <h2>Clientes cadastrados</h2>
+<div class="card">
 
-    <a href="{{ route('clientes.create') }}"
-       style="background: #2563eb; color: white; padding: 10px 18px; border-radius: 6px; text-decoration: none;">
-        + Novo Cliente
-    </a>
-</div>
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px; margin-bottom:20px;">
+        <div>
+            <h3 style="margin:0 0 8px;">Clientes Cadastrados</h3>
+            <p style="margin:0; color:#64748b;">
+                Gerenciamento dos clientes da oficina mecânica.
+            </p>
+        </div>
 
-@if(session('success'))
-    <p style="color: green;">
-        {{ session('success') }}
-    </p>
-@endif
+        <a href="{{ route('clientes.create') }}"
+           style="background:#064f80; color:white; padding:11px 18px; border-radius:6px; text-decoration:none; font-weight:bold;">
+            + Novo Cliente
+        </a>
+    </div>
 
-<div style="background: white; padding: 20px; border-radius: 8px; overflow-x: auto;">
+    @if (session('success'))
+        <div style="background:#e8f5e9; color:#256029; padding:14px; border-radius:6px; margin-bottom:20px;">
+            {{ session('success') }}
+        </div>
+    @endif
 
-    <table style="width: 100%; border-collapse: collapse;">
-        <thead>
-            <tr>
-                <th style="padding: 12px; text-align: left;">Nome</th>
-                <th style="padding: 12px; text-align: left;">CPF</th>
-                <th style="padding: 12px; text-align: left;">Telefone</th>
-                <th style="padding: 12px; text-align: left;">E-mail</th>
-                <th style="padding: 12px; text-align: left;">Ações</th>
-            </tr>
-        </thead>
+    @if (session('error'))
+        <div style="background:#ffebee; color:#b71c1c; padding:14px; border-radius:6px; margin-bottom:20px;">
+            {{ session('error') }}
+        </div>
+    @endif
 
-        <tbody>
-            @forelse($clientes as $cliente)
+    <div style="overflow-x:auto;">
+        <table>
+            <thead>
                 <tr>
-                    <td style="padding: 12px;">{{ $cliente->nome }}</td>
-                    <td style="padding: 12px;">{{ $cliente->cpf }}</td>
-                    <td style="padding: 12px;">{{ $cliente->telefone }}</td>
-                    <td style="padding: 12px;">{{ $cliente->email }}</td>
-
-                    <td style="padding: 12px;">
-                        <a href="{{ route('clientes.show', $cliente) }}">
-                            Ver
-                        </a>
-
-                        <a href="{{ route('clientes.edit', $cliente) }}">
-                            Editar
-                        </a>
-
-                        <form action="{{ route('clientes.destroy', $cliente) }}"
-                              method="POST"
-                              style="display: inline;"
-                              onsubmit="return confirm('Deseja excluir este cliente?')">
-                            @csrf
-                            @method('DELETE')
-
-                            <button type="submit"
-                                    style="color: red; border: none; background: none; cursor: pointer;">
-                                Excluir
-                            </button>
-                        </form>
-                    </td>
+                    <th>Nome</th>
+                    <th>CPF</th>
+                    <th>Telefone</th>
+                    <th>E-mail</th>
+                    <th>Status</th>
+                    <th>Ações</th>
                 </tr>
-            @empty
-                <tr>
-                    <td colspan="5" style="padding: 20px; text-align: center;">
-                        Nenhum cliente cadastrado.
-                    </td>
-                </tr>
-            @endforelse
-        </tbody>
-    </table>
+            </thead>
 
-    <div style="margin-top: 20px;">
+            <tbody>
+                @forelse ($clientes as $cliente)
+                    <tr>
+                        <td>{{ $cliente->nome }}</td>
+                        <td>{{ $cliente->cpf }}</td>
+                        <td>{{ $cliente->telefone }}</td>
+                        <td>{{ $cliente->email }}</td>
+
+                        <td>
+                            @if ($cliente->ativo)
+                                <span style="background:#e8f5e9; color:#256029; padding:6px 10px; border-radius:5px; font-size:12px; font-weight:bold;">
+                                    Ativo
+                                </span>
+                            @else
+                                <span style="background:#ffebee; color:#b71c1c; padding:6px 10px; border-radius:5px; font-size:12px; font-weight:bold;">
+                                    Inativo
+                                </span>
+                            @endif
+                        </td>
+
+                        <td>
+                            <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+
+                                <a href="{{ route('clientes.show', $cliente) }}">
+                                    Ver
+                                </a>
+
+                                <a href="{{ route('clientes.edit', $cliente) }}">
+                                    Editar
+                                </a>
+
+                                @if ($cliente->ativo)
+                                    <form action="{{ route('clientes.destroy', $cliente) }}"
+                                          method="POST"
+                                          style="margin:0;"
+                                          onsubmit="return confirm('Deseja realmente desativar este cliente?');">
+
+                                        @csrf
+                                        @method('DELETE')
+
+                                        <button type="submit"
+                                                style="background:#b91c1c; padding:7px 12px;">
+                                            Desativar
+                                        </button>
+                                    </form>
+                                @endif
+
+                            </div>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="6" style="text-align:center; padding:25px;">
+                            Nenhum cliente cadastrado.
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    <div style="margin-top:20px;">
         {{ $clientes->links() }}
     </div>
 

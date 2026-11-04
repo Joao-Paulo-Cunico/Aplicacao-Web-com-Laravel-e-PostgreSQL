@@ -3,8 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Marca;
+use App\Models\Modelo;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
+use Illuminate\Database\QueryException;
 
 class MarcaController extends Controller
 {
@@ -56,7 +57,26 @@ class MarcaController extends Controller
 
     public function destroy(Marca $marca)
     {
-        $marca->delete();
+        $possuiModelos = Modelo::where(
+            'marca_id',
+            $marca->id_marca
+        )->exists();
+
+        if ($possuiModelos) {
+            return redirect()->route('marcas.index')
+                ->with('error', 'Esta marca não pode ser excluída porque possui modelos vinculados.');
+        }
+
+        try {
+            $marca->delete();
+        } catch (QueryException $e) {
+            if ($e->getCode() === '23503') {
+                return redirect()->route('marcas.index')
+                    ->with('error', 'Esta marca possui registros vinculados e não pode ser excluída.');
+            }
+
+            throw $e;
+        }
 
         return redirect()->route('marcas.index')
             ->with('success', 'Marca excluída com sucesso!');
