@@ -1,163 +1,40 @@
+@extends('layouts.app')
 
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+@section('title', 'Peças')
 
-    <title>Peças - Oficina Mecânica</title>
+@section('content')
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f6f9;
-            margin: 0;
-            padding: 30px;
-        }
+<div class="card">
 
-        .container {
-            max-width: 1100px;
-            margin: auto;
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px #00000015;
-        }
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px; margin-bottom:20px;">
+        <div>
+            <h3 style="margin:0 0 8px;">Gerenciamento de Peças</h3>
+            <p style="margin:0; color:#64748b;">Controle de peças e estoque da Oficina Mecânica.</p>
+        </div>
 
-        h1 {
-            color: #263445;
-            margin-bottom: 5px;
-        }
-
-        p {
-            color: #666;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 10px 15px;
-            color: white;
-            text-decoration: none;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .btn-novo {
-            background: #263445;
-            margin-top: 15px;
-        }
-
-        .btn-editar {
-            background: #1769aa;
-        }
-
-        .btn-excluir {
-            background: #dc3545;
-        }
-
-        .acoes {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        th, td {
-            padding: 12px;
-            border-bottom: 1px solid #ddd;
-            text-align: left;
-        }
-
-        th {
-            background: #263445;
-            color: white;
-        }
-
-        tr:hover {
-            background: #f8f9fa;
-        }
-
-        .em-estoque {
-            color: green;
-            font-weight: bold;
-        }
-
-        .sem-estoque {
-            color: red;
-            font-weight: bold;
-        }
-
-        .mensagem-sucesso {
-            background: #d4edda;
-            color: #155724;
-            padding: 12px;
-            margin: 15px 0;
-            border-radius: 5px;
-        }
-
-        .mensagem-erro {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 12px;
-            margin: 15px 0;
-            border-radius: 5px;
-        }
-
-        .paginacao {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            margin-top: 20px;
-        }
-
-        .paginacao a {
-            color: #1769aa;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        .tabela-container {
-            overflow-x: auto;
-        }
-    </style>
-</head>
-
-<body>
-
-<div class="container">
-
-    <h1>Gerenciamento de Peças</h1>
-
-    <p>Controle de peças e estoque da Oficina Mecânica.</p>
+        <!-- Botão de cadastro -->
+        <a href="{{ route('pecas.create') }}"
+           style="background:#064f80; color:white; padding:11px 18px; border-radius:6px; text-decoration:none; font-weight:bold;">
+            + Nova Peça
+        </a>
+    </div>
 
     <!-- Mensagem de sucesso -->
     @if (session('success'))
-        <div class="mensagem-sucesso">
+        <div style="background:#e8f5e9; color:#256029; padding:14px; border-radius:6px; margin-bottom:20px;">
             {{ session('success') }}
         </div>
     @endif
 
     <!-- Mensagem de erro -->
     @if (session('error'))
-        <div class="mensagem-erro">
+        <div style="background:#ffebee; color:#b71c1c; padding:14px; border-radius:6px; margin-bottom:20px;">
             {{ session('error') }}
         </div>
     @endif
 
-    <!-- Botão de cadastro -->
-    <a href="{{ route('pecas.create') }}" class="btn btn-novo">
-        + Nova Peça
-    </a>
-
     <!-- Tabela de peças -->
-    <div class="tabela-container">
+    <div style="overflow-x:auto;">
 
         <table>
             <thead>
@@ -189,7 +66,7 @@
                             R$ {{ number_format((float) $peca->preco_venda, 2, ',', '.') }}
                         </td>
 
-                        <td class="{{ $peca->estoque > 0 ? 'em-estoque' : 'sem-estoque' }}">
+                        <td style="color:{{ $peca->estoque > 0 ? '#256029' : '#b71c1c' }}; font-weight:bold;">
                             {{ $peca->estoque }}
                         </td>
 
@@ -198,11 +75,11 @@
                         </td>
 
                         <td>
-                            <div class="acoes">
+                            <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
 
                                 <!-- Botão Editar -->
                                 <a href="{{ route('pecas.edit', $peca) }}"
-                                   class="btn btn-editar">
+                                   style="font-size:14px;">
                                     Editar
                                 </a>
 
@@ -215,7 +92,7 @@
                                     @csrf
                                     @method('DELETE')
 
-                                    <button type="submit" class="btn btn-excluir">
+                                    <button type="submit" style="background:#b91c1c; padding:7px 12px;">
                                         Excluir
                                     </button>
 
@@ -228,7 +105,7 @@
                 @empty
 
                     <tr>
-                        <td colspan="7" style="text-align: center;">
+                        <td colspan="7" style="text-align:center; padding:25px;">
                             Nenhuma peça cadastrada.
                         </td>
                     </tr>
@@ -241,28 +118,60 @@
     </div>
 
     <!-- Paginação -->
-    <div class="paginacao">
+    @php
+        $pecas->withQueryString();
+    @endphp
 
-        @if ($pecas->previousPageUrl())
-            <a href="{{ $pecas->previousPageUrl() }}">
-                Anterior
+    <nav role="navigation" aria-label="Paginação de peças"
+         style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:20px; font-size:14px;">
+
+        @if ($pecas->onFirstPage())
+            <span aria-disabled="true"
+                  style="background:#e2e8f0; color:#64748b; padding:10px 14px; border-radius:6px; font-weight:bold; white-space:nowrap;">
+                « Primeira
+            </span>
+            <span aria-disabled="true"
+                  style="background:#e2e8f0; color:#64748b; padding:10px 14px; border-radius:6px; font-weight:bold; white-space:nowrap;">
+                ‹ Anterior
+            </span>
+        @else
+            <a href="{{ $pecas->url(1) }}"
+               style="background:#064f80; color:white; padding:10px 14px; border-radius:6px; text-decoration:none; font-weight:bold; white-space:nowrap;">
+                « Primeira
+            </a>
+            <a href="{{ $pecas->previousPageUrl() }}" rel="prev"
+               style="background:#064f80; color:white; padding:10px 14px; border-radius:6px; text-decoration:none; font-weight:bold; white-space:nowrap;">
+                ‹ Anterior
             </a>
         @endif
 
-        <span>
+        <span aria-live="polite" style="color:#64748b;">
             Página {{ $pecas->currentPage() }}
             de {{ $pecas->lastPage() }}
         </span>
 
-        @if ($pecas->nextPageUrl())
-            <a href="{{ $pecas->nextPageUrl() }}">
-                Próxima
+        @if ($pecas->hasMorePages())
+            <a href="{{ $pecas->nextPageUrl() }}" rel="next"
+               style="background:#064f80; color:white; padding:10px 14px; border-radius:6px; text-decoration:none; font-weight:bold; white-space:nowrap;">
+                Próxima ›
             </a>
+            <a href="{{ $pecas->url($pecas->lastPage()) }}"
+               style="background:#064f80; color:white; padding:10px 14px; border-radius:6px; text-decoration:none; font-weight:bold; white-space:nowrap;">
+                Última »
+            </a>
+        @else
+            <span aria-disabled="true"
+                  style="background:#e2e8f0; color:#64748b; padding:10px 14px; border-radius:6px; font-weight:bold; white-space:nowrap;">
+                Próxima ›
+            </span>
+            <span aria-disabled="true"
+                  style="background:#e2e8f0; color:#64748b; padding:10px 14px; border-radius:6px; font-weight:bold; white-space:nowrap;">
+                Última »
+            </span>
         @endif
 
-    </div>
+    </nav>
 
 </div>
 
-</body>
-</html>
+@endsection

@@ -1,121 +1,60 @@
+@extends('layouts.app')
 
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editar Peça - Oficina Mecânica</title>
+@section('title', 'Editar Peça')
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f6f9;
-            padding: 30px;
-        }
+@section('content')
 
-        .container {
-            max-width: 650px;
-            margin: auto;
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px #00000015;
-        }
+<div class="card" style="max-width:750px;">
 
-        h1 {
-            color: #263445;
-        }
-
-        label {
-            display: block;
-            margin-top: 15px;
-            font-weight: bold;
-        }
-
-        input, textarea, select {
-            width: 100%;
-            box-sizing: border-box;
-            padding: 10px;
-            margin-top: 5px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 12px 20px;
-            margin-top: 20px;
-            background: #263445;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            text-decoration: none;
-        }
-
-        .voltar {
-            background: #777;
-        }
-
-        .erro {
-            color: red;
-            font-size: 13px;
-        }
-    </style>
-</head>
-<body>
-
-<div class="container">
-
-    <h1>Editar Peça #{{ $peca->id_peca }}</h1>
+    <h3 style="margin:0 0 20px;">Editar Peça #{{ $peca->id_peca }}</h3>
 
     <form action="{{ route('pecas.update', $peca) }}" method="POST">
         @csrf
         @method('PUT')
 
-        <label>Nome da Peça</label>
-        <input type="text" name="nome"
+        <label style="display:block; margin-top:15px; font-weight:bold;">Nome da Peça</label>
+        <input style="display:block; width:100%; margin-top:5px;" type="text" name="nome"
                value="{{ old('nome', $peca->nome) }}"
                maxlength="150" required>
         @error('nome')
-            <span class="erro">{{ $message }}</span>
+            <span style="color:#b71c1c; font-size:13px;">{{ $message }}</span>
         @enderror
 
-        <label>Descrição</label>
-        <textarea name="descricao" maxlength="500" required>{{ old('descricao', $peca->descricao) }}</textarea>
+        <label style="display:block; margin-top:15px; font-weight:bold;">Descrição</label>
+        <textarea style="display:block; width:100%; margin-top:5px;" name="descricao" maxlength="500" required>{{ old('descricao', $peca->descricao) }}</textarea>
         @error('descricao')
-            <span class="erro">{{ $message }}</span>
+            <span style="color:#b71c1c; font-size:13px;">{{ $message }}</span>
         @enderror
 
-        <label>Preço de Custo (R$)</label>
-        <input type="number" name="preco_custo"
+        <label style="display:block; margin-top:15px; font-weight:bold;">Preço de Custo (R$)</label>
+        <input style="display:block; width:100%; margin-top:5px;" type="number" name="preco_custo"
                step="0.01" min="0"
                value="{{ old('preco_custo', $peca->preco_custo) }}"
                required>
         @error('preco_custo')
-            <span class="erro">{{ $message }}</span>
+            <span style="color:#b71c1c; font-size:13px;">{{ $message }}</span>
         @enderror
 
-        <label>Preço de Venda (R$)</label>
-        <input type="number" name="preco_venda"
+        <label style="display:block; margin-top:15px; font-weight:bold;">Preço de Venda (R$)</label>
+        <input style="display:block; width:100%; margin-top:5px;" type="number" name="preco_venda"
                step="0.01" min="0"
                value="{{ old('preco_venda', $peca->preco_venda) }}"
                required>
         @error('preco_venda')
-            <span class="erro">{{ $message }}</span>
+            <span style="color:#b71c1c; font-size:13px;">{{ $message }}</span>
         @enderror
 
-        <label>Quantidade em Estoque</label>
-        <input type="number" name="estoque"
+        <label style="display:block; margin-top:15px; font-weight:bold;">Quantidade em Estoque</label>
+        <input style="display:block; width:100%; margin-top:5px;" type="number" name="estoque"
                min="0" step="1"
                value="{{ old('estoque', $peca->estoque) }}"
                required>
         @error('estoque')
-            <span class="erro">{{ $message }}</span>
+            <span style="color:#b71c1c; font-size:13px;">{{ $message }}</span>
         @enderror
 
-        <label>Situação da Peça</label>
-        <select name="ativo" required>
+        <label style="display:block; margin-top:15px; font-weight:bold;">Situação da Peça</label>
+        <select style="display:block; width:100%; margin-top:5px;" name="ativo" required>
             <option value="1" @selected(old('ativo', (int) $peca->ativo) == '1')>
                 Ativa
             </option>
@@ -124,19 +63,57 @@
             </option>
         </select>
         @error('ativo')
-            <span class="erro">{{ $message }}</span>
+            <span style="color:#b71c1c; font-size:13px;">{{ $message }}</span>
         @enderror
 
-        <button type="submit" class="btn">
-            Salvar Alterações
-        </button>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:20px;">
+            <button type="submit" style="padding:12px 20px; border-radius:6px;">
+                Salvar Alterações
+            </button>
 
-        <a href="{{ route('pecas.index') }}" class="btn voltar">
-            Voltar
-        </a>
+            <a href="{{ route('pecas.index') }}"
+               style="background:#e5e7eb; color:#333; padding:12px 20px; border-radius:6px; text-decoration:none; font-size:14px;">
+                Voltar
+            </a>
+        </div>
     </form>
 
 </div>
 
-</body>
-</html>
+<section class="card" aria-labelledby="repor-estoque-titulo"
+         style="max-width:750px; margin-top:25px; border-top:4px solid #ffde00;">
+
+    <h3 id="repor-estoque-titulo" style="margin:0 0 15px;">Repor Estoque</h3>
+
+    <p style="background:#f2f5f8; padding:15px; border-radius:6px; margin:0 0 20px;">
+        Estoque atual: <strong style="color:#064f80;">{{ $peca->estoque }}</strong>
+    </p>
+
+    @if (session('success'))
+        <div role="status" style="background:#e8f5e9; color:#256029; padding:14px; border-radius:6px; margin-bottom:20px;">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    <form action="{{ route('pecas.repor-estoque', $peca) }}" method="POST">
+        @csrf
+
+        <label for="quantidade" style="display:block; font-weight:bold;">Quantidade a repor</label>
+        <input type="number" id="quantidade" name="quantidade"
+               min="1" max="10000" step="1"
+               value="{{ old('quantidade', 1) }}" required
+               style="display:block; width:100%; margin-top:5px;">
+        @error('quantidade')
+            <span role="alert" style="display:block; color:#b71c1c; font-size:13px; margin-top:5px;">{{ $message }}</span>
+        @enderror
+
+        <div style="margin-top:20px;">
+            <button type="submit" style="padding:12px 20px; border-radius:6px;">
+                + Repor Estoque
+            </button>
+        </div>
+    </form>
+
+</section>
+
+@endsection

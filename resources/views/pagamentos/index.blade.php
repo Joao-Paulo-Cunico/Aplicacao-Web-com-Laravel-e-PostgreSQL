@@ -1,118 +1,33 @@
+@extends('layouts.app')
 
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+@section('title', 'Pagamentos')
 
-    <title>Pagamentos - Oficina Mecânica</title>
+@section('content')
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f6f9;
-            margin: 0;
-            padding: 30px;
-        }
+<div class="card">
 
-        .container {
-            max-width: 1100px;
-            margin: auto;
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px #00000015;
-        }
-
-        h1 {
-            color: #263445;
-            margin-bottom: 5px;
-        }
-
-        p {
-            color: #666;
-        }
-
-        .tabela-container {
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        th, td {
-            padding: 12px;
-            border-bottom: 1px solid #ddd;
-            text-align: left;
-        }
-
-        th {
-            background: #263445;
-            color: white;
-        }
-
-        tr:hover {
-            background: #f8f9fa;
-        }
-
-        .valor {
-            color: #198754;
-            font-weight: bold;
-        }
-
-        .status {
-            display: inline-block;
-            background: #e9ecef;
-            padding: 6px 10px;
-            border-radius: 5px;
-        }
-
-        .paginacao {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            margin-top: 20px;
-        }
-
-        .paginacao a {
-            color: #1769aa;
-            font-weight: bold;
-            text-decoration: none;
-        }
-
-        .paginacao a:hover {
-            text-decoration: underline;
-        }
-    </style>
-</head>
-
-<body>
-
-<div class="container">
-
-
-        @if (session('success'))
-            <div style="background:#d4edda; color:#155724; padding:12px; margin:15px 0; border-radius:5px;">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        @if (session('error'))
-            <div style="background:#f8d7da; color:#721c24; padding:12px; margin:15px 0; border-radius:5px;">
-                {{ session('error') }}
-            </div>
-        @endif
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px; margin-bottom:20px;">
+        <h3 style="margin:0;">Pagamentos Cadastrados</h3>
 
         <a href="{{ route('pagamentos.create') }}"
-        style="display:inline-block; padding:12px 20px; background:#263445; color:white; text-decoration:none; border-radius:5px; margin-top:15px;">
+           style="background:#064f80; color:white; padding:11px 18px; border-radius:6px; text-decoration:none; font-weight:bold;">
             + Novo Pagamento
         </a>
+    </div>
 
+    @if (session('success'))
+        <div style="background:#e8f5e9; color:#256029; padding:14px; border-radius:6px; margin-bottom:20px;">
+            {{ session('success') }}
+        </div>
+    @endif
 
-    <div class="tabela-container">
+    @if (session('error'))
+        <div style="background:#ffebee; color:#b71c1c; padding:14px; border-radius:6px; margin-bottom:20px;">
+            {{ session('error') }}
+        </div>
+    @endif
+
+    <div style="overflow-x:auto;">
 
         <table>
             <thead>
@@ -143,11 +58,11 @@
                             {{ $pagamento->data_pagamento->format('d/m/Y') }}
                         </td>
 
-                        <td class="valor">
+                        <td style="color:#256029; font-weight:bold;">
                             R$ {{ number_format((float) $pagamento->valor, 2, ',', '.') }}
                         </td>
                         
-                        <td class="valor">
+                        <td style="color:#256029; font-weight:bold;">
                             R$ {{ number_format((float) $pagamento->total_pago_os, 2, ',', '.') }}
                         </td>
 
@@ -156,28 +71,29 @@
                         </td>
 
                         <td>
-                            <span class="status">
+                            <span style="display:inline-block; background:#e2e8f0; color:#334155; padding:6px 10px; border-radius:5px; font-size:12px; font-weight:bold;">
                                 {{ $pagamento->status }}
                             </span>
                         </td>
                         
                         <td>
-                            <div style="display:flex; gap:8px; align-items:center;">
+                            <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
 
                                 <a href="{{ route('pagamentos.edit', $pagamento) }}"
-                                style="background:#1769aa; color:white; padding:8px 12px; border-radius:5px; text-decoration:none;">
+                                   style="font-size:14px;">
                                     Editar
                                 </a>
-                              <form action="{{ route('pagamentos.destroy', $pagamento) }}"
-                                    method="POST"
-                                    onsubmit="return confirm('Tem certeza que deseja excluir este pagamento?')"
-                                    style="margin:0;">
+
+                                <form action="{{ route('pagamentos.destroy', $pagamento) }}"
+                                      method="POST"
+                                      onsubmit="return confirm('Tem certeza que deseja excluir este pagamento?')"
+                                      style="margin:0;">
 
                                     @csrf
                                     @method('DELETE')
 
                                     <button type="submit"
-                                            style="background:#dc3545; color:white; padding:8px 12px; border:0; border-radius:5px; cursor:pointer;">
+                                            style="background:#b91c1c; padding:7px 12px;">
                                         Excluir
                                     </button>
                                 </form>
@@ -189,7 +105,7 @@
                 @empty
 
                     <tr>
-                       <td colspan="8" style="text-align:center;">
+                        <td colspan="8" style="text-align:center; padding:25px;">
                             Nenhum pagamento cadastrado.
                         </td>
                     </tr>
@@ -201,28 +117,61 @@
 
     </div>
 
-    <div class="paginacao">
+    <!-- Paginação -->
+    @php
+        $pagamentos->withQueryString();
+    @endphp
 
-        @if ($pagamentos->previousPageUrl())
-            <a href="{{ $pagamentos->previousPageUrl() }}">
-                Anterior
+    <nav role="navigation" aria-label="Paginação de pagamentos"
+         style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:20px; font-size:14px;">
+
+        @if ($pagamentos->onFirstPage())
+            <span aria-disabled="true"
+                  style="background:#e2e8f0; color:#64748b; padding:10px 14px; border-radius:6px; font-weight:bold; white-space:nowrap;">
+                « Primeira
+            </span>
+            <span aria-disabled="true"
+                  style="background:#e2e8f0; color:#64748b; padding:10px 14px; border-radius:6px; font-weight:bold; white-space:nowrap;">
+                ‹ Anterior
+            </span>
+        @else
+            <a href="{{ $pagamentos->url(1) }}"
+               style="background:#064f80; color:white; padding:10px 14px; border-radius:6px; text-decoration:none; font-weight:bold; white-space:nowrap;">
+                « Primeira
+            </a>
+            <a href="{{ $pagamentos->previousPageUrl() }}" rel="prev"
+               style="background:#064f80; color:white; padding:10px 14px; border-radius:6px; text-decoration:none; font-weight:bold; white-space:nowrap;">
+                ‹ Anterior
             </a>
         @endif
 
-        <span>
+        <span aria-live="polite" style="color:#64748b;">
             Página {{ $pagamentos->currentPage() }}
             de {{ $pagamentos->lastPage() }}
         </span>
 
-        @if ($pagamentos->nextPageUrl())
-            <a href="{{ $pagamentos->nextPageUrl() }}">
-                Próxima
+        @if ($pagamentos->hasMorePages())
+            <a href="{{ $pagamentos->nextPageUrl() }}" rel="next"
+               style="background:#064f80; color:white; padding:10px 14px; border-radius:6px; text-decoration:none; font-weight:bold; white-space:nowrap;">
+                Próxima ›
             </a>
+            <a href="{{ $pagamentos->url($pagamentos->lastPage()) }}"
+               style="background:#064f80; color:white; padding:10px 14px; border-radius:6px; text-decoration:none; font-weight:bold; white-space:nowrap;">
+                Última »
+            </a>
+        @else
+            <span aria-disabled="true"
+                  style="background:#e2e8f0; color:#64748b; padding:10px 14px; border-radius:6px; font-weight:bold; white-space:nowrap;">
+                Próxima ›
+            </span>
+            <span aria-disabled="true"
+                  style="background:#e2e8f0; color:#64748b; padding:10px 14px; border-radius:6px; font-weight:bold; white-space:nowrap;">
+                Última »
+            </span>
         @endif
 
-    </div>
+    </nav>
 
 </div>
 
-</body>
-</html>
+@endsection

@@ -1,93 +1,17 @@
+@extends('layouts.app')
 
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+@section('title', 'Editar Pagamento')
 
-    <title>Editar Pagamento - Oficina Mecânica</title>
+@section('content')
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f6f9;
-            margin: 0;
-            padding: 30px;
-        }
+<div class="card" style="max-width:750px;">
 
-        .container {
-            max-width: 650px;
-            margin: auto;
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px #00000015;
-        }
+    <h3 style="margin:0 0 20px;">Editar Pagamento #{{ $pagamento->id_pagamento }}</h3>
 
-        h1 {
-            color: #263445;
-        }
-
-        p {
-            color: #666;
-        }
-
-        label {
-            display: block;
-            margin-top: 15px;
-            font-weight: bold;
-        }
-
-        input, select {
-            width: 100%;
-            box-sizing: border-box;
-            padding: 10px;
-            margin-top: 5px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 12px 20px;
-            margin-top: 20px;
-            background: #263445;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            text-decoration: none;
-        }
-
-        .voltar {
-            background: #777;
-        }
-
-        .erro {
-            color: #dc3545;
-            font-size: 13px;
-        }
-
-        .mensagem-sucesso {
-            background: #d4edda;
-            color: #155724;
-            padding: 12px;
-            margin-bottom: 15px;
-            border-radius: 5px;
-        }
-    </style>
-</head>
-
-<body>
-
-<div class="container">
-
-    <h1>Editar Pagamento #{{ $pagamento->id_pagamento }}</h1>
-
-    <p>Altere as informações do pagamento abaixo.</p>
+    <p style="color:#64748b; margin:0 0 25px;">Altere as informações do pagamento abaixo.</p>
 
     @if (session('success'))
-        <div class="mensagem-sucesso">
+        <div style="background:#e8f5e9; color:#256029; padding:14px; border-radius:6px; margin-bottom:20px;">
             {{ session('success') }}
         </div>
     @endif
@@ -98,31 +22,31 @@
         @method('PUT')
 
         <!-- Ordem de Serviço -->
-        <label>Número da Ordem de Serviço</label>
-        <input type="number"
+        <label style="display:block; margin-top:15px; font-weight:bold;">Número da Ordem de Serviço</label>
+        <input style="display:block; width:100%; margin-top:5px;" type="number"
                name="ordem_servico_id"
                min="1"
                value="{{ old('ordem_servico_id', $pagamento->ordem_servico_id) }}"
                required>
 
         @error('ordem_servico_id')
-            <span class="erro">{{ $message }}</span>
+            <span style="color:#b71c1c; font-size:13px;">{{ $message }}</span>
         @enderror
 
         <!-- Data do Pagamento -->
-        <label>Data do Pagamento</label>
-        <input type="date"
+        <label style="display:block; margin-top:15px; font-weight:bold;">Data do Pagamento</label>
+        <input style="display:block; width:100%; margin-top:5px;" type="date"
                name="data_pagamento"
                value="{{ old('data_pagamento', $pagamento->data_pagamento->format('Y-m-d')) }}"
                required>
 
         @error('data_pagamento')
-            <span class="erro">{{ $message }}</span>
+            <span style="color:#b71c1c; font-size:13px;">{{ $message }}</span>
         @enderror
 
         <!-- Valor -->
-        <label>Valor do Pagamento (R$)</label>
-        <input type="number"
+        <label style="display:block; margin-top:15px; font-weight:bold;">Valor do Pagamento (R$)</label>
+        <input style="display:block; width:100%; margin-top:5px;" type="number"
                name="valor"
                step="0.01"
                min="0.01"
@@ -131,12 +55,12 @@
                required>
 
         @error('valor')
-            <span class="erro">{{ $message }}</span>
+            <span style="color:#b71c1c; font-size:13px;">{{ $message }}</span>
         @enderror
 
         <!-- Forma de Pagamento -->
-        <label>Forma de Pagamento</label>
-        <select name="forma_pagamento" required>
+        <label style="display:block; margin-top:15px; font-weight:bold;">Forma de Pagamento</label>
+        <select style="display:block; width:100%; margin-top:5px;" name="forma_pagamento" required>
             <option value="">Selecione</option>
 
             @foreach (['PIX', 'DINHEIRO', 'CREDITO', 'DEBITO', 'TRANSFERENCIA'] as $forma)
@@ -148,12 +72,12 @@
         </select>
 
         @error('forma_pagamento')
-            <span class="erro">{{ $message }}</span>
+            <span style="color:#b71c1c; font-size:13px;">{{ $message }}</span>
         @enderror
 
         <!-- Status -->
-        <label>Status do Pagamento</label>
-        <select name="status" required>
+        <label style="display:block; margin-top:15px; font-weight:bold;">Status do Pagamento</label>
+        <select style="display:block; width:100%; margin-top:5px;" name="status" required>
             <option value="">Selecione</option>
 
             @foreach (['PAGO', 'PENDENTE', 'CANCELADO'] as $status)
@@ -165,21 +89,23 @@
         </select>
 
         @error('status')
-            <span class="erro">{{ $message }}</span>
+            <span style="color:#b71c1c; font-size:13px;">{{ $message }}</span>
         @enderror
 
         <!-- Botões -->
-        <button type="submit" class="btn">
-            Salvar Alterações
-        </button>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:20px;">
+            <button type="submit" style="padding:12px 20px; border-radius:6px;">
+                Salvar Alterações
+            </button>
 
-        <a href="{{ route('pagamentos.index') }}" class="btn voltar">
-            Voltar
-        </a>
+            <a href="{{ route('pagamentos.index') }}"
+               style="background:#e5e7eb; color:#333; padding:12px 20px; border-radius:6px; text-decoration:none; font-size:14px;">
+                Voltar
+            </a>
+        </div>
 
     </form>
 
 </div>
 
-</body>
-</html>
+@endsection
