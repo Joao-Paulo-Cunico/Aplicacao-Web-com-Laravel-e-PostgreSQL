@@ -61,7 +61,6 @@
            style="background:#e2e8f0; color:#334155; padding:11px 15px; border-radius:5px; text-decoration:none; font-size:14px;">
             Limpar
         </a>
-
     </form>
 
     <!-- Quantidade de resultados -->
@@ -113,6 +112,20 @@
                                 <a href="{{ route('modelos.edit', $modelo) }}">
                                     Editar
                                 </a>
+
+                                <form action="{{ route('modelos.destroy', $modelo) }}"
+                                      method="POST"
+                                      style="margin:0;"
+                                      onsubmit="return confirm('Deseja realmente excluir este modelo? Esta ação não pode ser desfeita.');">
+
+                                    @csrf
+                                    @method('DELETE')
+
+                                    <button type="submit"
+                                            style="background:#b91c1c; padding:7px 12px;">
+                                        Excluir
+                                    </button>
+                                </form>
 
                             </div>
                         </td>
