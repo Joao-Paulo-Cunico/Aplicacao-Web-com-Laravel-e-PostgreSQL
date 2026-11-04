@@ -10,17 +10,16 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
+use App\Models\Servico;
 
 class OrdemServicoController extends Controller
 {
-    public function __construct(private OrdemServicoService $service)
-    {
-    }
+    public function __construct(private OrdemServicoService $service) {}
 
     public function index(Request $request): View
     {
         $ordens = OrdemServico::with('mecanico')
-            ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status))
+            ->when($request->filled('status'), fn($q) => $q->where('status', $request->status))
             ->orderByDesc('data_abertura')
             ->paginate(15)
             ->withQueryString();
@@ -68,11 +67,20 @@ class OrdemServicoController extends Controller
 
         $totais = $this->service->calcularTotais($ordemServico);
 
+        $servicosDisponiveis = Servico::where('ativo', true)->orderBy('nome')->get();
+
+        $pecasDisponiveis = DB::table('oficina_mecanica.peca')
+            ->where('ativo', true)
+            ->where('estoque', '>', 0)
+            ->orderBy('nome')
+            ->get(['id_peca', 'nome', 'preco_venda', 'estoque']);
+
         return view('ordens-servico.show', [
             'ordem' => $ordemServico,
             'placa' => $placa,
             'pecas' => $pecas,
             'totais' => $totais,
+            'servicosDisponiveis' => $servicosDisponiveis,
         ]);
     }
 }

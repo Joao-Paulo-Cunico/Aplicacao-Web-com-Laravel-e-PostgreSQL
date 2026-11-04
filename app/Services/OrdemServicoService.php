@@ -6,6 +6,7 @@ use App\Models\Mecanico;
 use App\Models\OrdemServico;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use App\Models\Servico;
 
 class OrdemServicoService
 {
@@ -17,9 +18,9 @@ class OrdemServicoService
         OrdemServico::STATUS_FINALIZADA => [],
         OrdemServico::STATUS_CANCELADA => [],
     ];
-    
+
     // Abre uma nova OS. Toda OS nasce "Em andamento".
-     
+
     public function abrir(array $dados): OrdemServico
     {
         $mecanico = Mecanico::find($dados['mecanico_id']);
@@ -73,9 +74,9 @@ class OrdemServicoService
         }
     }
 
-    
+
     // Usada antes de incluir serviços/peças: só OS em andamento pode ser alterada.
-    
+
     public function garantirEmAndamento(OrdemServico $ordem): void
     {
         if ($ordem->status !== OrdemServico::STATUS_EM_ANDAMENTO) {
@@ -83,6 +84,54 @@ class OrdemServicoService
                 'status' => 'Esta ordem de serviço não está em andamento e não pode ser alterada.',
             ]);
         }
+    }
+
+    
+     //Inclui um serviço na OS. Se já existir na OS, soma quantidade e desconto.
+     //Tudo numa transação: se algo falhar, nada é gravado.
+     
+    public function adicionarServico(OrdemServico $ordem, int $servicoId, int $quantidade, float $desconto = 0): void
+    {
+        DB::transaction(function () use ($ordem, $servicoId, $quantidade, $desconto) {
+            // Trava a linha da OS para ninguém fechá-la enquanto incluímos o item
+            $ordem = OrdemServico::lockForUpdate()->findOrFail($ordem->id_ordem_servico);
+            $this->garantirEmAndamento($ordem);
+
+            $servico = Servico::find($servicoId);
+
+            if (! $servico || ! $servico->ativo) {
+                throw ValidationException::withMessages([
+                    'servico_id' => 'Selecione um serviço ativo.',
+                ]);
+            }
+
+            $desconto = round($desconto, 2);
+
+            if ($desconto > $quantidade * (float) $servico->preco_base) {
+                throw ValidationException::withMessages([
+                    'desconto' => 'O desconto não pode ser maior que o valor do item.',
+                ]);
+            }
+
+            $existente = $ordem->servicos()->wherePivot('servico_id', $servicoId)->first();
+
+            if ($existente) {
+                $ordem->servicos()->updateExistingPivot($servicoId, [
+                    'quantidade' => $existente->pivot->quantidade + $quantidade,
+                    'desconto' => round(($existente->pivot->desconto ?? 0) + $desconto, 2),
+                ]);
+
+                return;
+            }
+
+            // O valor unitário é copiado do cadastro no momento da inclusão:
+            // se o preço do serviço mudar depois, esta OS não muda.
+            $ordem->servicos()->attach($servicoId, [
+                'quantidade' => $quantidade,
+                'valor_unitario' => $servico->preco_base,
+                'desconto' => $desconto,
+            ]);
+        });
     }
 
     private function somarItens(string $tabela, int $ordemId): float
