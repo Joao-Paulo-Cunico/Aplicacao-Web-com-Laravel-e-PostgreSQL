@@ -25,7 +25,12 @@ class OrdemServicoController extends Controller
             ->paginate(15)
             ->withQueryString();
 
-        return view('ordens-servico.index', compact('ordens'));
+        // Placas dos veículos da página (tenho que trocar por relacionamento quando o Model Veiculo chegar)
+        $placas = DB::table('oficina_mecanica.veiculo')
+            ->whereIn('id_veiculo', $ordens->pluck('veiculo_id'))
+            ->pluck('placa', 'id_veiculo');
+
+        return view('ordens-servico.index', compact('ordens', 'placas'));
     }
 
     public function create(): View
@@ -52,6 +57,22 @@ class OrdemServicoController extends Controller
     {
         $ordemServico->load(['mecanico', 'servicos']);
 
-        return view('ordens-servico.show', ['ordem' => $ordemServico]);
+        $placa = DB::table('oficina_mecanica.veiculo')
+            ->where('id_veiculo', $ordemServico->veiculo_id)
+            ->value('placa');
+
+        $pecas = DB::table('oficina_mecanica.ordem_servico_peca as osp')
+            ->join('oficina_mecanica.peca as p', 'p.id_peca', '=', 'osp.peca_id')
+            ->where('osp.ordem_servico_id', $ordemServico->id_ordem_servico)
+            ->get(['p.nome', 'osp.quantidade', 'osp.valor_unitario', 'osp.desconto']);
+
+        $totais = $this->service->calcularTotais($ordemServico);
+
+        return view('ordens-servico.show', [
+            'ordem' => $ordemServico,
+            'placa' => $placa,
+            'pecas' => $pecas,
+            'totais' => $totais,
+        ]);
     }
 }
