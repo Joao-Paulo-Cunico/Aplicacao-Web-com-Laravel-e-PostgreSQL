@@ -86,10 +86,10 @@ class OrdemServicoService
         }
     }
 
-    
-     //Inclui um serviço na OS. Se já existir na OS, soma quantidade e desconto.
-     //Tudo numa transação: se algo falhar, nada é gravado.
-     
+
+    //Inclui um serviço na OS. Se já existir na OS, soma quantidade e desconto.
+    //Tudo numa transação: se algo falhar, nada é gravado.
+
     public function adicionarServico(OrdemServico $ordem, int $servicoId, int $quantidade, float $desconto = 0): void
     {
         DB::transaction(function () use ($ordem, $servicoId, $quantidade, $desconto) {
@@ -133,6 +133,72 @@ class OrdemServicoService
             ]);
         });
     }
+
+
+    // Inclui uma peça na OS, validando estoque e valores.
+    public function adicionarPeca(
+        OrdemServico $ordem,
+        int $pecaId,
+        int $quantidade,
+        float $desconto = 0
+    ): void {
+        DB::transaction(function () use ($ordem, $pecaId, $quantidade, $desconto) {
+
+            // Bloqueia a OS durante a operação.
+            $ordem = OrdemServico::lockForUpdate()
+                ->findOrFail($ordem->id_ordem_servico);
+
+            $this->garantirEmAndamento($ordem);
+
+            // Busca e bloqueia a peça para evitar concorrência no estoque.
+            $peca = DB::table('oficina_mecanica.peca')
+                ->where('id_peca', $pecaId)
+                ->lockForUpdate()
+                ->first();
+
+            if (! $peca || ! $peca->ativo) {
+                throw ValidationException::withMessages([
+                    'peca_id' => 'A peça selecionada não existe ou está inativa.',
+                ]);
+            }
+
+            if ($quantidade > $peca->estoque) {
+                throw ValidationException::withMessages([
+                    'quantidade' => 'Estoque insuficiente para essa quantidade.',
+                ]);
+            }
+
+            // Não permite adicionar a mesma peça duas vezes nesta OS.
+            $jaExiste = DB::table('oficina_mecanica.ordem_servico_peca')
+                ->where('ordem_servico_id', $ordem->id_ordem_servico)
+                ->where('peca_id', $pecaId)
+                ->exists();
+
+            if ($jaExiste) {
+                throw ValidationException::withMessages([
+                    'peca_id' => 'Esta peça já foi adicionada à ordem de serviço.',
+                ]);
+            }
+
+            $desconto = round($desconto, 2);
+            $valorTotal = $quantidade * (float) $peca->preco_venda;
+
+            if ($desconto > $valorTotal) {
+                throw ValidationException::withMessages([
+                    'desconto' => 'O desconto não pode ser maior que o valor do item.',
+                ]);
+            }
+
+            // Insere a peça na OS.
+            // A trigger do PostgreSQL deverá realizar a baixa do estoque.
+            $ordem->pecas()->attach($pecaId, [
+                'quantidade' => $quantidade,
+                'valor_unitario' => $peca->preco_venda,
+                'desconto' => $desconto,
+            ]);
+        });
+    }
+
 
     private function somarItens(string $tabela, int $ordemId): float
     {

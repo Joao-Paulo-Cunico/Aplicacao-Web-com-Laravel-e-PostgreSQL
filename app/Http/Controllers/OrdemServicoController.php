@@ -81,6 +81,7 @@ class OrdemServicoController extends Controller
             'pecas' => $pecas,
             'totais' => $totais,
             'servicosDisponiveis' => $servicosDisponiveis,
+            'pecasDisponiveis' => $pecasDisponiveis,
         ]);
     }
 }
