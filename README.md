@@ -1,58 +1,116 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+Real Motor — Sistema de Gerenciamento de Oficina Mecânica
+Centro Universitário Campo Real | Engenharia de Software | 2026
+Disciplinas: Desenvolvimento Back-end e Banco de Dados
+DOCUMENTO DE ACESSO RESTRITO À BANCA. Este README contém credenciais de acesso ao banco de dados. Envie-o diretamente ao professor e não o publique no GitHub ou em repositório público.
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Requisitos do Sistema
 
-## About Laravel
+- PHP 8.5.9
+- Laravel Framework 13.38.0
+- Composer 2.10.3
+- PostgreSQL (Neon)
+- Git
+- Extensão PHP pdo_pgsql habilitada
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+1. Apresentação
+O Real Motor é um sistema web para gerenciamento de uma oficina mecânica. A aplicação foi desenvolvida em PHP/Laravel, com páginas em Blade, banco de dados PostgreSQL hospedado no Neon e uma API REST para peças.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+O sistema oferece gerenciamento de clientes, marcas, modelos, veículos, mecânicos, serviços, peças, ordens de serviço e pagamentos.
+2. Repositório
+https://github.com/Joao-Paulo-Cunico/Aplicacao-Web-com-Laravel-e-PostgreSQL
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+A versão a ser avaliada deve estar atualizada na branch main.
+3. Pré-requisitos
+- PHP compatível com a versão do Laravel do projeto, com extensões pdo_pgsql, pgsql e demais extensões requeridas pelo framework;
+- Composer;
+- Git;
+- Acesso à internet para conexão ao banco Neon.
+4. Instalação e execução
+4.1. Clonar o projeto
+git clone https://github.com/Joao-Paulo-Cunico/Aplicacao-Web-com-Laravel-e-PostgreSQL.git
+cd Aplicacao-Web-com-Laravel-e-PostgreSQL
+Importante: execute os próximos comandos na pasta que contém o arquivo artisan e o composer.json. Se esses arquivos estiverem em uma subpasta, entre nela antes de continuar.
 
-## Learning Laravel
+4.2. Instalar dependências
+composer install
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+4.3. Criar o arquivo de ambiente
+No PowerShell (Windows):
+Copy-Item .env.example .env
+No Linux/macOS:
+cp .env.example .env
+Depois, configure o .env com os valores da seção 5 e gere a chave da aplicação:
+php artisan key:generate
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+4.4. Limpar o cache e iniciar
+php artisan optimize:clear
+php artisan serve
+Acesse http://127.0.0.1:8000.
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+Caso a porta 8000 esteja ocupada:
+php artisan serve --port=8001
+Nesse caso, acesse http://127.0.0.1:8001.
 
-## Agentic Development
+5. Configuração do banco PostgreSQL (Neon)
+As credenciais abaixo foram fornecidas pela equipe para acesso da banca. Copie as linhas para a seção correspondente do arquivo .env local:
+DB_CONNECTION=pgsql
+DB_HOST=ep-royal-cloud-be2xuw6b.c-9.us-east-2.aws.neon.tech
+DB_PORT=5432
+DB_DATABASE=neondb
+DB_USERNAME=neondb_owner
+DB_PASSWORD=npg_J4LH1KdSNbhe
+DB_SSLMODE=require
+DB_SCHEMA=oficina_mecanica
+O banco utiliza o schema oficina_mecanica. A configuração de schema deve ser respeitada conforme o projeto Laravel. A conexão depende de o banco estar acessível e as credenciais permanecerem válidas.
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+Não execute comandos destrutivos no banco compartilhado, como php artisan migrate:fresh, php artisan migrate:reset ou php artisan db:wipe. A estrutura e os dados já foram preparados pela equipe.
 
-```bash
-composer require laravel/boost --dev
+Segurança: neondb_owner é uma conta proprietária. Não inclua estas credenciais em commits, capturas públicas, issues ou materiais disponibilizados abertamente. Recomenda-se utilizar uma conta específica de avaliação e trocar a senha depois da banca.
 
-php artisan boost:install
-```
+6. Funcionalidades disponíveis
+Módulo	Principais funcionalidades
+Clientes	Listagem, cadastro, consulta, edição, exclusão e reativação
+Marcas	Cadastro, consulta, edição e exclusão, com proteção de vínculos
+Modelos	Cadastro, consulta, edição e exclusão, com proteção de vínculos
+Veículos	Cadastro, consulta, edição, desativação e reativação
+Mecânicos	Cadastro e gerenciamento de profissionais
+Serviços	Cadastro e gerenciamento de serviços
+Peças	Cadastro, gerenciamento e reposição de estoque
+Ordens de serviço	Abertura, consulta, inclusão de serviços e peças, fechamento e cancelamento
+Pagamentos	Cadastro, consulta, edição e exclusão
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
 
-## Contributing
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
 
-## Code of Conduct
+As telas de gerenciamento também incluem recursos de pesquisa, filtros e paginação, conforme o módulo.
+7. Roteiro sugerido para a avaliação
+1. Abrir a página inicial do sistema.
+2. Acessar Clientes e consultar ou cadastrar um registro de teste.
+3. Acessar Marcas, Modelos e Veículos para verificar os cadastros e seus relacionamentos.
+4. Consultar os módulos Mecânicos, Serviços e Peças.
+5. Abrir uma Ordem de Serviço, associando veículo e mecânico.
+6. Incluir serviços e peças, conferir os valores e verificar as opções de finalização/cancelamento.
+7. Acessar Pagamentos e consultar ou registrar um pagamento de teste.
+8. Testar os campos de pesquisa, filtros e paginação nas listagens.
+Atenção: os registros são armazenados no banco compartilhado. Evite alterar ou excluir dados existentes durante a avaliação; utilize registros de teste.
+8. API REST de peças
+Método	Endpoint	Finalidade
+GET	/api/pecas	Listar peças
+GET	/api/pecas/{peca}	Consultar uma peça
+POST	/api/pecas	Cadastrar peça
+PUT	/api/pecas/{peca}	Atualizar peça
+DELETE	/api/pecas/{peca}	Excluir peça
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
 
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Os endpoints podem ser testados no Postman, utilizando como endereço base http://127.0.0.1:8000 ou a porta efetivamente usada pelo servidor.
+9. Verificações técnicas
+Para listar as rotas registradas:
+php artisan route:list
+Para executar testes automatizados somente após confirmar que o ambiente de testes está isolado do banco compartilhado:
+php artisan test
+O registro de 75 rotas foi observado durante a verificação local do projeto em novembro de 2026. Esse número pode variar após novas alterações.
+10. Integrantes
+- Léo Pedro Burei: Clientes, Marcas, Modelos e Veículos; pesquisas, filtros e padronização visual das interfaces.
+- João Paulo Cunico: Mecânicos, Serviços, Ordens de Serviço e regras operacionais.
+- Luis Rodrigo Molon: Peças, Pagamentos, API REST, recursos SQL e procedimentos de backup.
+Real Motor — Projeto acadêmico, 2026.
