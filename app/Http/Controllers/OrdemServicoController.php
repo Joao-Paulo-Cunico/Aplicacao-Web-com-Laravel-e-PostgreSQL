@@ -15,6 +15,7 @@ use Illuminate\View\View;
 use App\Http\Requests\OrdemServicoUpdateRequest;
 use Illuminate\Database\QueryException;
 
+
 class OrdemServicoController extends Controller
 {
     public function __construct(

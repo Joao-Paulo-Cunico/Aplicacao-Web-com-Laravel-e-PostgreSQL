@@ -29,14 +29,42 @@
     <p><strong>Observações:</strong> {{ $ordem->observacoes ?: '—' }}</p>
 
     @if ($ordem->status === \App\Models\OrdemServico::STATUS_EM_ANDAMENTO)
-    <form action="{{ route('ordens-servico.fechar', $ordem) }}" method="POST">
-        @csrf
-        <button type="submit" onclick="return confirm('Deseja finalizar esta ordem de serviço?')">Finalizar OS</button>
-    </form>
-    <form action="{{ route('ordens-servico.cancelar', $ordem) }}" method="POST">
-        @csrf
-        <button type="submit" onclick="return confirm('Deseja cancelar esta ordem de serviço? As peças serão devolvidas ao estoque.')">Cancelar OS</button>
-    </form>
+        <style>
+            .acoes-os { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+            .acoes-os form { margin: 0; }
+            .btn-os {
+                display: inline-block; padding: 10px 16px; border: 0; border-radius: 6px;
+                font-size: 14px; font-family: inherit; color: #fff; cursor: pointer; text-decoration: none;
+            }
+            .btn-os:hover { opacity: .9; }
+            .btn-editar { background: #2563eb; }
+            .btn-finalizar { background: #16a34a; }
+            .btn-cancelar { background: #d97706; }
+            .btn-excluir { background: #dc2626; }
+        </style>
+
+        <div class="acoes-os">
+            <a href="{{ route('ordens-servico.edit', $ordem) }}" class="btn-os btn-editar">Editar OS</a>
+
+            <form action="{{ route('ordens-servico.fechar', $ordem) }}" method="POST">
+                @csrf
+                <button type="submit" class="btn-os btn-finalizar"
+                    onclick="return confirm('Deseja finalizar esta ordem de serviço?')">Finalizar OS</button>
+            </form>
+
+            <form action="{{ route('ordens-servico.cancelar', $ordem) }}" method="POST">
+                @csrf
+                <button type="submit" class="btn-os btn-cancelar"
+                    onclick="return confirm('Deseja cancelar esta ordem de serviço? As peças serão devolvidas ao estoque.')">Cancelar OS</button>
+            </form>
+
+            <form action="{{ route('ordens-servico.destroy', $ordem) }}" method="POST"
+                onsubmit="return confirm('Excluir esta OS? Só é possível se ela não tiver serviços nem peças.')">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn-os btn-excluir">Excluir OS</button>
+            </form>
+        </div>
     @endif
 
     <h3>Serviços</h3>
@@ -72,16 +100,6 @@
     </table>
 
     @if ($ordem->status === \App\Models\OrdemServico::STATUS_EM_ANDAMENTO)
-    <div>
-        <a href="{{ route('ordens-servico.edit', $ordem) }}">Editar OS</a>
-
-        <form action="{{ route('ordens-servico.destroy', $ordem) }}" method="POST" style="display:inline"
-            onsubmit="return confirm('Excluir esta OS? Só é possível se ela não tiver serviços nem peças.')">
-            @csrf
-            @method('DELETE')
-            <button type="submit">Excluir OS</button>
-        </form>
-    </div>
     <form action="{{ route('ordens-servico.servicos.store', $ordem) }}" method="POST">
         @csrf
         <select name="servico_id" required>
