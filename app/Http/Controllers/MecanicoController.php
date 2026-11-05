@@ -6,15 +6,29 @@ use App\Http\Requests\MecanicoRequest;
 use App\Models\Mecanico;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class MecanicoController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $mecanicos = Mecanico::orderBy('nome')->paginate(10);
+        $pesquisa = trim((string) $request->query('pesquisa', ''));
 
-        return view('mecanicos.index', compact('mecanicos'));
+        $mecanicos = Mecanico::query()
+            ->when($pesquisa !== '', function ($query) use ($pesquisa) {
+                $query->where(function ($q) use ($pesquisa) {
+                    $q->where('nome', 'ilike', '%' . $pesquisa . '%')
+                      ->orWhere('cpf', 'ilike', '%' . $pesquisa . '%')
+                      ->orWhere('telefone', 'ilike', '%' . $pesquisa . '%')
+                      ->orWhere('especilidade', 'ilike', '%' . $pesquisa . '%');
+                });
+            })
+            ->orderBy('nome')
+            ->paginate(30)
+            ->withQueryString();
+
+        return view('mecanicos.index', compact('mecanicos', 'pesquisa'));
     }
 
     public function create(): View
@@ -59,8 +73,12 @@ class MecanicoController extends Controller
         try {
             $mecanico->delete();
         } catch (QueryException $e) {
-            return redirect()->route('mecanicos.index')
-                ->with('error', 'Não foi possível excluir: o mecânico possui ordens de serviço.');
+            if ($e->getCode() === '23503') {
+                return redirect()->route('mecanicos.index')
+                    ->with('error', 'Não foi possível excluir: o mecânico possui ordens de serviço.');
+            }
+
+            throw $e;
         }
 
         return redirect()->route('mecanicos.index')

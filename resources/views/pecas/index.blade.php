@@ -1,3 +1,4 @@
+
 @extends('layouts.app')
 
 @section('title', 'Peças')
@@ -8,35 +9,67 @@
 
     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px; margin-bottom:20px;">
         <div>
-            <h3 style="margin:0 0 8px;">Gerenciamento de Peças</h3>
-            <p style="margin:0; color:#64748b;">Controle de peças e estoque da Oficina Mecânica.</p>
+            <h2 style="margin:0;">Gerenciamento de Peças</h2>
+            <p style="margin:6px 0 0; color:#64748b;">
+                Consulte e gerencie as peças e o estoque da oficina.
+            </p>
         </div>
 
-        <!-- Botão de cadastro -->
         <a href="{{ route('pecas.create') }}"
-           style="background:#064f80; color:white; padding:11px 18px; border-radius:6px; text-decoration:none; font-weight:bold;">
-            + Nova Peça
+           style="background:#064F80; color:white; padding:12px 18px; border-radius:7px; text-decoration:none; font-weight:600;">
+            + Nova peça
         </a>
     </div>
 
-    <!-- Mensagem de sucesso -->
     @if (session('success'))
-        <div style="background:#e8f5e9; color:#256029; padding:14px; border-radius:6px; margin-bottom:20px;">
+        <div style="background:#e8f5e9; color:#256029; padding:14px; border-radius:7px; margin-bottom:20px;">
             {{ session('success') }}
         </div>
     @endif
 
-    <!-- Mensagem de erro -->
     @if (session('error'))
-        <div style="background:#ffebee; color:#b71c1c; padding:14px; border-radius:6px; margin-bottom:20px;">
+        <div style="background:#ffebee; color:#b71c1c; padding:14px; border-radius:7px; margin-bottom:20px;">
             {{ session('error') }}
         </div>
     @endif
 
-    <!-- Tabela de peças -->
-    <div style="overflow-x:auto;">
+    <form method="GET"
+          action="{{ route('pecas.index') }}"
+          style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px;">
 
-        <table>
+        <input
+            type="text"
+            name="pesquisa"
+            value="{{ $pesquisa ?? '' }}"
+            placeholder="Pesquisar por nome ou descrição..."
+            style="flex:1; min-width:200px; padding:11px; border:1px solid #cbd5e1; border-radius:7px;"
+        >
+
+        <select name="situacao"
+                style="padding:11px; border:1px solid #cbd5e1; border-radius:7px;">
+            <option value="">Todas as situações</option>
+            <option value="ativo" {{ ($situacao ?? '') === 'ativo' ? 'selected' : '' }}>
+                Ativas
+            </option>
+            <option value="inativo" {{ ($situacao ?? '') === 'inativo' ? 'selected' : '' }}>
+                Inativas
+            </option>
+        </select>
+
+        <button type="submit"
+                style="background:#FFDE00; color:#064F80; padding:11px 20px; border:0; border-radius:7px; font-weight:700; cursor:pointer;">
+            Pesquisar
+        </button>
+
+        <a href="{{ route('pecas.index') }}"
+           style="padding:11px 16px; border:1px solid #cbd5e1; border-radius:7px; text-decoration:none;">
+            Limpar
+        </a>
+
+    </form>
+
+    <div style="overflow-x:auto;">
+        <table style="width:100%;">
             <thead>
                 <tr>
                     <th>ID</th>
@@ -50,9 +83,7 @@
             </thead>
 
             <tbody>
-
                 @forelse ($pecas as $peca)
-
                     <tr>
                         <td>{{ $peca->id_peca }}</td>
 
@@ -66,107 +97,91 @@
                             R$ {{ number_format((float) $peca->preco_venda, 2, ',', '.') }}
                         </td>
 
-                        <td style="color:{{ $peca->estoque > 0 ? '#256029' : '#b71c1c' }}; font-weight:bold;">
+                        <td style="font-weight:600; color:{{ $peca->estoque > 0 ? '#15803d' : '#b91c1c' }};">
                             {{ $peca->estoque }}
                         </td>
 
                         <td>
-                            {{ $peca->ativo ? 'Ativa' : 'Inativa' }}
+                            <span style="font-weight:600; color:{{ $peca->ativo ? '#15803d' : '#b91c1c' }};">
+                                {{ $peca->ativo ? 'Ativa' : 'Inativa' }}
+                            </span>
                         </td>
 
                         <td>
-                            <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+                            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
 
-                                <!-- Botão Editar -->
-                                <a href="{{ route('pecas.edit', $peca) }}"
-                                   style="font-size:14px;">
-                                    Editar
+                                <a href="{{ route('pecas.edit', $peca) }}">
+                                    Editar / Estoque
                                 </a>
 
-                                <!-- Botão Excluir -->
                                 <form action="{{ route('pecas.destroy', $peca) }}"
                                       method="POST"
-                                      onsubmit="return confirm('Tem certeza que deseja excluir esta peça?')"
-                                      style="margin: 0;">
+                                      style="display:inline; margin:0;"
+                                      onsubmit="return confirm('Excluir esta peça?')">
 
                                     @csrf
                                     @method('DELETE')
 
-                                    <button type="submit" style="background:#b91c1c; padding:7px 12px;">
+                                    <button type="submit"
+                                            style="background:none; border:0; padding:0; color:#b91c1c; cursor:pointer;">
                                         Excluir
                                     </button>
-
                                 </form>
 
                             </div>
                         </td>
                     </tr>
-
                 @empty
-
                     <tr>
                         <td colspan="7" style="text-align:center; padding:25px;">
-                            Nenhuma peça cadastrada.
+                            Nenhuma peça encontrada.
                         </td>
                     </tr>
-
                 @endforelse
-
             </tbody>
         </table>
-
     </div>
 
-    <!-- Paginação -->
-    @php
-        $pecas->withQueryString();
-    @endphp
-
-    <nav role="navigation" aria-label="Paginação de peças"
+    <nav aria-label="Paginação de peças"
          style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:20px; font-size:14px;">
 
         @if ($pecas->onFirstPage())
-            <span aria-disabled="true"
-                  style="background:#e2e8f0; color:#64748b; padding:10px 14px; border-radius:6px; font-weight:bold; white-space:nowrap;">
-                « Primeira
+            <span style="background:#e2e8f0; color:#64748b; padding:10px 14px; border-radius:6px;">
+                Primeira
             </span>
-            <span aria-disabled="true"
-                  style="background:#e2e8f0; color:#64748b; padding:10px 14px; border-radius:6px; font-weight:bold; white-space:nowrap;">
-                ‹ Anterior
+            <span style="background:#e2e8f0; color:#64748b; padding:10px 14px; border-radius:6px;">
+                Anterior
             </span>
         @else
             <a href="{{ $pecas->url(1) }}"
-               style="background:#064f80; color:white; padding:10px 14px; border-radius:6px; text-decoration:none; font-weight:bold; white-space:nowrap;">
-                « Primeira
+               style="background:#064F80; color:white; padding:10px 14px; border-radius:6px; text-decoration:none;">
+                Primeira
             </a>
-            <a href="{{ $pecas->previousPageUrl() }}" rel="prev"
-               style="background:#064f80; color:white; padding:10px 14px; border-radius:6px; text-decoration:none; font-weight:bold; white-space:nowrap;">
-                ‹ Anterior
+            <a href="{{ $pecas->previousPageUrl() }}"
+               style="background:#064F80; color:white; padding:10px 14px; border-radius:6px; text-decoration:none;">
+                Anterior
             </a>
         @endif
 
-        <span aria-live="polite" style="color:#64748b;">
-            Página {{ $pecas->currentPage() }}
-            de {{ $pecas->lastPage() }}
+        <span style="color:#64748b;">
+            Página {{ $pecas->currentPage() }} de {{ $pecas->lastPage() }}
         </span>
 
         @if ($pecas->hasMorePages())
-            <a href="{{ $pecas->nextPageUrl() }}" rel="next"
-               style="background:#064f80; color:white; padding:10px 14px; border-radius:6px; text-decoration:none; font-weight:bold; white-space:nowrap;">
-                Próxima ›
+            <a href="{{ $pecas->nextPageUrl() }}"
+               style="background:#064F80; color:white; padding:10px 14px; border-radius:6px; text-decoration:none;">
+                Próxima
             </a>
             <a href="{{ $pecas->url($pecas->lastPage()) }}"
-               style="background:#064f80; color:white; padding:10px 14px; border-radius:6px; text-decoration:none; font-weight:bold; white-space:nowrap;">
-                Última »
+               style="background:#064F80; color:white; padding:10px 14px; border-radius:6px; text-decoration:none;">
+                Última
             </a>
         @else
-            <span aria-disabled="true"
-                  style="background:#e2e8f0; color:#64748b; padding:10px 14px; border-radius:6px; font-weight:bold; white-space:nowrap;">
-                Próxima ›
+            <span style="background:#e2e8f0; color:#64748b; padding:10px 14px; border-radius:6px;">
+                Próxima
             </span>
-            <span aria-disabled="true"
-                  style="background:#e2e8f0; color:#64748b; padding:10px 14px; border-radius:6px; font-weight:bold; white-space:nowrap;">
-                Última »
+            <span style="background:#e2e8f0; color:#64748b; padding:10px 14px; border-radius:6px;">
+                Última
             </span>
         @endif
 

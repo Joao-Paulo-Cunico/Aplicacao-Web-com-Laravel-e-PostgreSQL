@@ -8,20 +8,37 @@ use Illuminate\Support\Facades\DB;
 
 class PecaController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $pecas = Peca::orderBy('id_peca')->paginate(15);
+        $pesquisa = trim((string) $request->query('pesquisa', ''));
+        $situacao = $request->query('situacao', '');
 
-        return view('pecas.index', compact('pecas'));
+        $pecas = Peca::query()
+            ->when($pesquisa !== '', function ($query) use ($pesquisa) {
+                $query->where(function ($q) use ($pesquisa) {
+                    $q->where('nome', 'ilike', '%' . $pesquisa . '%')
+                      ->orWhere('descricao', 'ilike', '%' . $pesquisa . '%');
+                });
+            })
+            ->when(
+                in_array($situacao, ['ativo', 'inativo'], true),
+                function ($query) use ($situacao) {
+                    $query->where('ativo', $situacao === 'ativo');
+                }
+            )
+            ->orderBy('id_peca')
+            ->paginate(30)
+            ->withQueryString();
+
+        return view('pecas.index', compact('pecas', 'pesquisa', 'situacao'));
     }
 
-  
     public function create()
     {
-         return view('pecas.create');
+        return view('pecas.create');
     }
 
-     public function store(Request $request)
+    public function store(Request $request)
     {
         $dados = $request->validate([
             'nome' => 'required|string|max:150',
@@ -37,7 +54,7 @@ class PecaController extends Controller
 
         return redirect()
             ->route('pecas.index')
-            ->with('success', 'Peca cadastrada com sucesso!');
+            ->with('success', 'Peça cadastrada com sucesso!');
     }
 
     public function show(Peca $peca)
@@ -50,8 +67,7 @@ class PecaController extends Controller
         return view('pecas.edit', compact('peca'));
     }
 
-
-     public function update(Request $request, Peca $peca)
+    public function update(Request $request, Peca $peca)
     {
         $dados = $request->validate([
             'nome' => 'required|string|max:150',
@@ -66,10 +82,10 @@ class PecaController extends Controller
 
         return redirect()
             ->route('pecas.index')
-            ->with('success', 'Peca atualizada com sucesso!');
+            ->with('success', 'Peça atualizada com sucesso!');
     }
 
-       public function destroy(Peca $peca)
+    public function destroy(Peca $peca)
     {
         $emUso = DB::table('ordem_servico_peca')
             ->where('peca_id', $peca->id_peca)
@@ -78,16 +94,16 @@ class PecaController extends Controller
         if ($emUso) {
             return redirect()
                 ->route('pecas.index')
-                ->with('error', 'Esta peca esta vinculada a uma ordem de servico e nao pode ser excluida!');
+                ->with('error', 'Esta peça está vinculada a uma ordem de serviço e não pode ser excluída!');
         }
 
         $peca->delete();
 
         return redirect()
             ->route('pecas.index')
-            ->with('success', 'Peca excluida com sucesso!');
+            ->with('success', 'Peça excluída com sucesso!');
     }
- 
+
     public function reporEstoque(Request $request, Peca $peca)
     {
         $dados = $request->validate([
@@ -103,5 +119,4 @@ class PecaController extends Controller
             ->route('pecas.edit', $peca)
             ->with('success', 'Estoque atualizado com sucesso!');
     }
-
 }
