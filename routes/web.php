@@ -26,7 +26,6 @@ Route::patch('veiculos/{veiculo}/reativar', [VeiculoController::class, 'reativar
 Route::resource('mecanicos', MecanicoController::class);
 Route::resource('servicos', ServicoController::class);
 Route::resource('ordens-servico', OrdemServicoController::class)
-    ->only(['index', 'create', 'store', 'show'])
     ->parameters(['ordens-servico' => 'ordemServico']);
 Route::post('ordens-servico/{ordemServico}/servicos', [OrdemServicoItemController::class, 'storeServico'])->name('ordens-servico.servicos.store');
 Route::post('ordens-servico/{ordemServico}/pecas', [OrdemServicoItemController::class, 'storePeca'])->name('ordens-servico.pecas.store');

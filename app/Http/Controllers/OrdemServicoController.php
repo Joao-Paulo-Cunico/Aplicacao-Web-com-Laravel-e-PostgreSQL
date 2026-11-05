@@ -12,6 +12,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use App\Http\Requests\OrdemServicoUpdateRequest;
+use Illuminate\Database\QueryException;
 
 class OrdemServicoController extends Controller
 {
@@ -192,9 +194,53 @@ class OrdemServicoController extends Controller
         ]);
     }
 
-    public function fechar(
-        OrdemServico $ordemServico
-    ): RedirectResponse {
+    public function edit(OrdemServico $ordemServico): View|RedirectResponse
+    {
+        if ($ordemServico->status !== OrdemServico::STATUS_EM_ANDAMENTO) {
+            return redirect()->route('ordens-servico.show', $ordemServico)
+                ->with('error', 'Somente OS em andamento pode ser editada.');
+        }
+
+        $mecanicos = Mecanico::where('ativo', true)->orderBy('nome')->get();
+        $placa = DB::table('oficina_mecanica.veiculo')
+            ->where('id_veiculo', $ordemServico->veiculo_id)
+            ->value('placa');
+
+        return view('ordens-servico.edit', [
+            'ordem' => $ordemServico,
+            'mecanicos' => $mecanicos,
+            'placa' => $placa,
+        ]);
+    }
+
+    public function update(OrdemServicoUpdateRequest $request, OrdemServico $ordemServico): RedirectResponse
+    {
+        $this->service->atualizar($ordemServico, $request->validated());
+
+        return redirect()->route('ordens-servico.show', $ordemServico)
+            ->with('success', 'Ordem de serviço atualizada com sucesso.');
+    }
+
+    public function destroy(OrdemServico $ordemServico): RedirectResponse
+    {
+        try {
+            $this->service->excluir($ordemServico);
+        } catch (QueryException $e) {
+            // 23503 = violação de chave estrangeira (ex.: pagamento vinculado)
+            if (($e->errorInfo[0] ?? null) === '23503') {
+                return redirect()->route('ordens-servico.show', $ordemServico)
+                    ->with('error', 'Não foi possível excluir: a OS possui registros vinculados.');
+            }
+
+            throw $e;
+        }
+
+        return redirect()->route('ordens-servico.index')
+            ->with('success', 'Ordem de serviço excluída com sucesso.');
+    }
+
+    public function fechar(OrdemServico $ordemServico): RedirectResponse
+    {
         try {
             $this->service->fechar($ordemServico);
 

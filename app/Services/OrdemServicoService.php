@@ -70,7 +70,7 @@ class OrdemServicoService
     public function calcularTotalViaFuncao(OrdemServico $ordem): float
     {
         $resultado = DB::select(
-            'select '.self::FUNCAO_CALCULAR_TOTAL.'(?) as total',
+            'select ' . self::FUNCAO_CALCULAR_TOTAL . '(?) as total',
             [$ordem->id_ordem_servico]
         );
 
@@ -120,7 +120,7 @@ class OrdemServicoService
                     ]);
                 }
 
-                DB::statement('CALL '.self::PROCEDURE_FINALIZAR.'(?)', [$ordem->id_ordem_servico]);
+                DB::statement('CALL ' . self::PROCEDURE_FINALIZAR . '(?)', [$ordem->id_ordem_servico]);
             });
         } catch (QueryException $exception) {
             throw ValidationException::withMessages([
@@ -150,7 +150,7 @@ class OrdemServicoService
                 foreach ($pecas as $peca) {
                     DB::table('oficina_mecanica.peca')
                         ->where('id_peca', $peca->peca_id)
-                        ->update(['estoque' => DB::raw('estoque + '.(int) $peca->quantidade)]);
+                        ->update(['estoque' => DB::raw('estoque + ' . (int) $peca->quantidade)]);
                 }
             }
 
@@ -272,6 +272,50 @@ class OrdemServicoService
                 'valor_unitario' => $peca->preco_venda,
                 'desconto' => $desconto,
             ]);
+        });
+    }
+
+    /**
+     * Edita uma OS em andamento (veículo, data e status não mudam).
+     */
+    public function atualizar(OrdemServico $ordem, array $dados): OrdemServico
+    {
+        return DB::transaction(function () use ($ordem, $dados) {
+            $ordem = OrdemServico::lockForUpdate()->findOrFail($ordem->id_ordem_servico);
+            $this->garantirEmAndamento($ordem);
+
+            $ordem->update([
+                'mecanico_id' => $dados['mecanico_id'],
+                'quilometragem_entrada' => $dados['quilometragem_entrada'],
+                'observacoes' => $dados['observacoes'] ?? null,
+                'valor_mao_obra' => $dados['valor_mao_obra'],
+            ]);
+
+            return $ordem;
+        });
+    }
+
+    
+    //Exclui uma OS apenas se estiver em andamento e sem itens.
+
+    public function excluir(OrdemServico $ordem): void
+    {
+        DB::transaction(function () use ($ordem) {
+            $ordem = OrdemServico::lockForUpdate()->findOrFail($ordem->id_ordem_servico);
+            $this->garantirEmAndamento($ordem);
+
+            $temItens = DB::table('oficina_mecanica.ordem_servico_servico')
+                ->where('ordem_servico_id', $ordem->id_ordem_servico)->exists()
+                || DB::table('oficina_mecanica.ordem_servico_peca')
+                ->where('ordem_servico_id', $ordem->id_ordem_servico)->exists();
+
+            if ($temItens) {
+                throw ValidationException::withMessages([
+                    'status' => 'Esta OS já tem serviços ou peças. Para encerrá-la, use "Cancelar OS".',
+                ]);
+            }
+
+            $ordem->delete();
         });
     }
 
